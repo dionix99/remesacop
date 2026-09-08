@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Remesa P2P — Calculadora de Arbitraje</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a14;
+            --bg-card: rgba(18, 18, 35, 0.85);
+            --bg-card-hover: rgba(25, 25, 50, 0.95);
+            --border: rgba(100, 120, 255, 0.12);
+            --border-glow: rgba(100, 180, 255, 0.25);
+            --accent-blue: #4e8cff;
+            --accent-green: #00e89d;
+            --accent-red: #ff4e6a;
+            --accent-orange: #ffaa2e;
+            --text: #e8eaf6;
+            --text-dim: #7a7fa8;
+            --text-muted: #4a4e6a;
+            --glass: rgba(255, 255, 255, 0.04);
+            --radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(78, 140, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 232, 157, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255, 78, 106, 0.03) 0%, transparent 50%);
+            animation: bgMove 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes bgMove {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            33% {
+                transform: translate(-2%, 1%);
+            }
+
+            66% {
+                transform: translate(1%, -2%);
+            }
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 100px;
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4e8cff, #00e89d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-dim);
+            background: var(--glass);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.offline {
+            background: var(--accent-red);
+            box-shadow: 0 0 8px var(--accent-red);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 14px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            background: var(--bg-card-hover);
+        }
+
+        .card-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .icon {
+            font-size: 14px;
+        }
+
+        /* ─── PRICE ROWS ─── */
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: var(--glass);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .price-row:hover {
+            border-color: var(--border-glow);
+        }
+
+        .price-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .price-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .price-label .flag {
+            font-size: 16px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        .price-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .price-value.ves {
+            color: var(--accent-blue);
+        }
+
+        .price-value.cop {
+            color: var(--accent-orange);
+        }
+
+        .price-nick {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            text-align: right;
+        }
+
+        /* ─── CALCULATOR (CLIENT) ─── */
+        .calc-section {
+            margin-top: 4px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(78, 140, 255, 0.15);
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 16px;
+            color: var(--text);
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .input-wrapper input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .input-suffix {
+            padding: 0 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        /* ─── RESULT BOX ─── */
+        .result-box {
+            background: linear-gradient(135deg, rgba(0, 232, 157, 0.08), rgba(78, 140, 255, 0.08));
+            border: 1px solid rgba(0, 232, 157, 0.2);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 6px;
+            transition: all 0.4s ease;
+        }
+
+        .result-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-green);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 34px;
+            font-weight: 800;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 30px rgba(0, 232, 157, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .result-sub {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 6px;
+        }
+
+        /* ─── BREAKDOWN/DESGLOSE ─── */
+        .breakdown {
+            margin-top: 14px;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 13px;
+        }
+
+        .breakdown-row:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-row .lbl {
+            color: var(--text-dim);
+        }
+
+        .breakdown-row .val {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .breakdown-row.highlight {
+            padding: 10px 0;
+            margin-top: 4px;
+            border-top: 1px solid rgba(0, 232, 157, 0.15);
+            border-bottom: none;
+        }
+
+        .breakdown-row.highlight .lbl {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .breakdown-row.highlight .val {
+            color: var(--accent-green);
+            font-size: 15px;
+        }
+
+        /* ─── PARAMS CARD ─── */
+        .params-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .param-item {
+            background: var(--glass);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .param-item:hover {
+            border-color: var(--border-glow);
+        }
+
+        .param-item label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+        }
+
+        .param-item input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            font-variant-numeric: tabular-nums;
+            transition: border-color 0.3s;
+        }
+
+        .param-item input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* ─── BUTTON ─── */
+        .btn-update {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #4e8cff, #2563eb);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(78, 140, 255, 0.3);
+            margin-top: 4px;
+        }
+
+        .btn-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(78, 140, 255, 0.45);
+        }
+
+        .btn-update:active {
+            transform: translateY(0);
+        }
+
+        .btn-update.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-update .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn-update.loading .spinner {
+            display: block;
+        }
+
+        .btn-update.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ─── GANANCIA CARD ─── */
+        .profit-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, rgba(0, 232, 157, 0.06), rgba(0, 232, 157, 0.02));
+            border: 1px solid rgba(0, 232, 157, 0.15);
+            border-radius: 14px;
+        }
+
+        .profit-card.negative {
+            background: linear-gradient(135deg, rgba(255, 78, 106, 0.06), rgba(255, 78, 106, 0.02));
+            border-color: rgba(255, 78, 106, 0.15);
+        }
+
+        .profit-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .profit-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--accent-green);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .profit-card.negative .profit-value {
+            color: var(--accent-red);
+        }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 400px) {
+            .app {
+                padding: 10px;
+            }
+
+            .price-value {
+                font-size: 17px;
+            }
+
+            .result-value {
+                font-size: 28px;
+            }
+
+            .params-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── MANUAL RATE INPUTS ─── */
+        .manual-rates {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .manual-rate {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .manual-rate label {
+            font-size: 10px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .manual-rate input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 12px 0;
+        }
+
+        .error-msg {
+            background: rgba(255, 78, 106, 0.1);
+            border: 1px solid rgba(255, 78, 106, 0.2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--accent-red);
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        /* ─── TASA DEL DÍA CARD ─── */
+        .rate-card {
+            background: linear-gradient(135deg, rgba(78, 140, 255, 0.1), rgba(0, 232, 157, 0.08));
+            border: 2px solid rgba(78, 140, 255, 0.3);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 14px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: rateGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes rateGlow {
+
+            0%,
+            100% {
+                border-color: rgba(78, 140, 255, 0.3);
+                box-shadow: 0 0 20px rgba(78, 140, 255, 0.1);
+            }
+
+            50% {
+                border-color: rgba(0, 232, 157, 0.4);
+                box-shadow: 0 0 30px rgba(0, 232, 157, 0.15);
+            }
+        }
+
+        .rate-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(78, 140, 255, 0.05) 0%, transparent 60%);
+            animation: rateShine 6s ease-in-out infinite;
+        }
+
+        @keyframes rateShine {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(5%, -5%);
+            }
+        }
+
+        .rate-card-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-blue);
+            margin-bottom: 6px;
+            position: relative;
+        }
+
+        .rate-card-sublabel {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .rate-card-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 40px rgba(78, 140, 255, 0.3);
+            position: relative;
+            line-height: 1.1;
+        }
+
+        .rate-card-unit {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 8px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .rate-card-detail {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+            position: relative;
+        }
+
+        .rate-detail-item {
+            text-align: center;
+        }
+
+        .rate-detail-item .rdl {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rate-detail-item .rdv {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rate-detail-item .rdv.blue {
+            color: var(--accent-blue);
+        }
+
+        .rate-detail-item .rdv.orange {
+            color: var(--accent-orange);
+        }
+
+        .rate-detail-item .rdv.green {
+            color: var(--accent-green);
+        }
+
+        /* ─── TASA REDONDEADA CARD ─── */
+        .rate-rounded-card {
+            background: linear-gradient(135deg, rgba(255, 170, 46, 0.1), rgba(255, 78, 106, 0.06));
+            border: 2px solid rgba(255, 170, 46, 0.35);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 14px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rate-rounded-card .rr-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-orange);
+            margin-bottom: 4px;
+        }
+
+        .rate-rounded-card .rr-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .rate-rounded-card .rr-value {
+            font-size: 54px;
+            font-weight: 800;
+            color: var(--accent-orange);
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 40px rgba(255, 170, 46, 0.25);
+            line-height: 1.1;
+        }
+
+        .rate-rounded-card .rr-detail {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 170, 46, 0.15);
+        }
+
+        .rate-rounded-card .rr-detail-item {
+            text-align: center;
+        }
+
+        .rate-rounded-card .rr-detail-item .rrdl {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rate-rounded-card .rr-detail-item .rrdv {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 2px;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rate-rounded-card .rr-arrow {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .rate-rounded-card .rr-arrow span {
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>💱 Remesa P2P</h1>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Conectando...</span>
+            </div>
+        </div>
+
+        <!-- ERROR MESSAGE -->
+        <div class="error-msg" id="errorMsg"></div>
+
+        <!-- PRECIOS BINANCE -->
+        <div class="card">
+            <div class="card-title"><span class="icon">📡</span> Precios Binance P2P (USDT)</div>
+
+            <div class="price-row">
+                <div>
+                    <div class="price-label"><span class="flag">🇻🇪</span> VES · Mercantil</div>
+                    <div class="price-nick" id="nickVes">—</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="price-value ves" id="priceVes">—</div>
+                    <div class="price-nick">Bs / USDT</div>
+                </div>
+            </div>
+
+            <div class="price-row">
+                <div>
+                    <div class="price-label"><span class="flag">🇨🇴</span> COP · Bancolombia</div>
+                    <div class="price-nick" id="nickCop">—</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="price-value cop" id="priceCop">—</div>
+                    <div class="price-nick">$ / USDT</div>
+                </div>
+            </div>
+
+            <!-- Manual override -->
+            <div class="divider" style="margin-top:14px"></div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">✏️ Editar tasas manualmente (si no
+                carga Binance):</div>
+            <div class="manual-rates">
+                <div class="manual-rate">
+                    <label>VES / USDT</label>
+                    <input type="number" id="manualVes" step="0.01" placeholder="961.60" oninput="onManualChange()">
+                </div>
+                <div class="manual-rate">
+                    <label>COP / USDT</label>
+                    <input type="number" id="manualCop" step="1" placeholder="3107" oninput="onManualChange()">
+                </div>
+            </div>
+
+            <div class="timestamp" id="lastUpdate">Sin actualizar</div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- TASA DEL DÍA -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="rate-card">
+            <div class="rate-card-label">📊 Tasa del Día</div>
+            <div class="rate-card-sublabel">COP → Bolívares (con ganancia incluida)</div>
+            <div class="rate-card-value" id="rateJ1Display">—</div>
+            <div class="rate-card-unit">1 COP = <span id="rateInverse">—</span> Bs</div>
+            <div class="rate-card-detail">
+                <div class="rate-detail-item">
+                    <div class="rdl">VES/USDT</div>
+                    <div class="rdv blue" id="rdVes">—</div>
+                </div>
+                <div class="rate-detail-item">
+                    <div class="rdl">COP/USDT</div>
+                    <div class="rdv orange" id="rdCop">—</div>
+                </div>
+                <div class="rate-detail-item">
+                    <div class="rdl">Venta COP</div>
+                    <div class="rdv green" id="rdVenta">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- TASA REDONDEADA (PARA EL CLIENTE) -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="rate-rounded-card">
+            <div class="rr-label">⬆️ Tasa para el Cliente</div>
+            <div class="rr-sub">Redondeada hacia arriba (siempre a tu favor)</div>
+            <div class="rr-value" id="rateRounded">—</div>
+            <div class="rr-arrow">Exacta: <span id="rrExact">—</span> → Redondeada: <span id="rrRound">—</span></div>
+            <div class="rr-detail">
+                <div class="rr-detail-item">
+                    <div class="rrdl">Si envía 10,000 COP</div>
+                    <div class="rrdv" id="rrEjemplo10k">— Bs</div>
+                </div>
+                <div class="rr-detail-item">
+                    <div class="rrdl">Si envía 50,000 COP</div>
+                    <div class="rrdv" id="rrEjemplo50k">— Bs</div>
+                </div>
+                <div class="rr-detail-item">
+                    <div class="rrdl">Si envía 100,000 COP</div>
+                    <div class="rrdv" id="rrEjemplo100k">— Bs</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- CALCULADORA PARA CLIENTES -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="card">
+            <div class="card-title"><span class="icon">🧮</span> Calculadora — ¿Cuánto entregar al cliente?</div>
+
+            <div class="calc-section">
+                <div class="input-group" style="display:none">
+                    <label>Referencia</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="clientAmount" placeholder="10000"
+                            value="100000" readonly>
+                        <div class="input-suffix">COP</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Monto a dividir (COP)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="montoDividir" placeholder="Ingresa monto"
+                            value="100000" oninput="calcularMontoDividido()">
+                        <div class="input-suffix">COP</div>
+                    </div>
+                </div>
+
+                <!-- RESULTADO PRINCIPAL -->
+                <div class="result-box" id="resultBox">
+                    <div class="result-label">Entregar al cliente</div>
+                    <div class="result-value" id="resultBs">—</div>
+                    <div class="result-sub">bolívares (Bs)</div>
+                </div>
+
+                <!-- DESGLOSE -->
+                <div class="breakdown">
+                    <div class="breakdown-row" style="display:none">
+                        <span class="lbl">Referencia</span>
+                        <span class="val" id="bkMonto">—</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="lbl">Tasa del día (COP/VES)</span>
+                        <span class="val" id="bkJ1">—</span>
+                    </div>
+                    <div class="breakdown-row highlight">
+                        <span class="lbl">COP ÷ Tasa = Bs</span>
+                        <span class="val" id="bkFinal">—</span>
+                    </div>
+                    <div class="breakdown-row" style="border-top:1px solid var(--border);padding-top:10px;">
+                        <span class="lbl">Tasa redondeada</span>
+                        <span class="val" id="bkTasaRound">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GANANCIA -->
+        <div class="card">
+            <div class="card-title"><span class="icon">💰</span> Tu Ganancia</div>
+            <div class="profit-card" id="profitCard">
+                <div>
+                    <div class="profit-label">Ganancia neta estimada</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Objetivo: $<span
+                            id="profitObj">1.20</span> USD equiv.</div>
+                </div>
+                <div class="profit-value" id="profitValue">$1.20</div>
+            </div>
+        </div>
+
+        <!-- PARÁMETROS -->
+        <div class="card">
+            <div class="card-title"><span class="icon">⚙️</span> Parámetros</div>
+            <div class="params-grid">
+                <div class="param-item">
+                    <label>Comisión %</label>
+                    <input type="number" id="paramCom" value="5" step="0.5" oninput="calcularTodo()">
+                </div>
+                <div class="param-item">
+                    <label>Margen COP (B6-B7)</label>
+                    <input type="number" id="paramMargen" value="100" step="10" oninput="calcularTodo()">
+                </div>
+                <div class="param-item">
+                    <label>Fee D1 %</label>
+                    <input type="number" id="paramFee1" value="0.1" step="0.01" oninput="calcularTodo()">
+                </div>
+                <div class="param-item">
+                    <label>Fee H1 %</label>
+                    <input type="number" id="paramFee2" value="0.1" step="0.01" oninput="calcularTodo()">
+                </div>
+                <div class="param-item">
+                    <label>Ganancia obj. (USD equiv.)</label>
+                    <input type="number" id="paramObj" value="1.20" step="0.1" oninput="calcularTodo()">
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTÓN ACTUALIZAR -->
+        <div class="card" style="padding:14px 20px;">
+            <button class="btn-update" id="btnUpdate" onclick="fetchPrices()">
+                <div class="spinner"></div>
+                <span class="btn-text">🔄 Actualizar Precios de Binance</span>
+            </button>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            Remesa P2P v1.0 — Prototipo de prueba<br>
+            Los precios provienen de Binance P2P (comerciantes no verificados)
+        </div>
+
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════
+        let state = {
+            priceVes: null,   // F3
+            priceCop: null,   // B7
+            nickVes: null,
+            nickCop: null,
+            tasaCliente: null, // tasa redondeada para el cliente
+        };
+
+        // ═══════════════════════════════════════
+        // BINANCE P2P API
+        // ═══════════════════════════════════════
+        const API_URL = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
+
+        async function fetchOrders(fiat, payType) {
+            const payload = {
+                asset: 'USDT',
+                fiat: fiat,
+                merchantCheck: false,
+                page: 1,
+                rows: 20,
+                tradeType: 'BUY',
+                payTypes: [payType],
+                classifies: ['mass', 'profession'],
+            };
+
+            const resp = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const json = await resp.json();
+            return json.data || [];
+        }
+
+        function bestUnverifiedBuy(orders) {
+            const unverified = orders.filter(o => o.advertiser.userType === 'user');
+            if (unverified.length === 0) return { price: null, nick: null };
+            unverified.sort((a, b) => parseFloat(a.adv.price) - parseFloat(b.adv.price));
+            return {
+                price: parseFloat(unverified[0].adv.price),
+                nick: unverified[0].advertiser.nickName,
+            };
+        }
+
+        async function fetchPrices() {
+            const btn = document.getElementById('btnUpdate');
+            const errEl = document.getElementById('errorMsg');
+            btn.classList.add('loading');
+            errEl.style.display = 'none';
+
+            try {
+                const [vesOrders, copOrders] = await Promise.all([
+                    fetchOrders('VES', 'Mercantil'),
+                    fetchOrders('COP', 'BancolombiaSA'),
+                ]);
+
+                const ves = bestUnverifiedBuy(vesOrders);
+                const cop = bestUnverifiedBuy(copOrders);
+
+                if (ves.price !== null) {
+                    state.priceVes = ves.price;
+                    state.nickVes = ves.nick;
+                    document.getElementById('priceVes').textContent = formatNum(ves.price, 2);
+                    document.getElementById('nickVes').textContent = `@${ves.nick}`;
+                    document.getElementById('manualVes').value = ves.price;
+                }
+
+                if (cop.price !== null) {
+                    state.priceCop = cop.price;
+                    state.nickCop = cop.nick;
+                    document.getElementById('priceCop').textContent = formatNum(cop.price, 0);
+                    document.getElementById('nickCop').textContent = `@${cop.nick}`;
+                    document.getElementById('manualCop').value = cop.price;
+                }
+
+                document.getElementById('statusDot').classList.remove('offline');
+                document.getElementById('statusText').textContent = 'En línea';
+                document.getElementById('lastUpdate').textContent = `Actualizado: ${new Date().toLocaleTimeString('es')}`;
+
+                calcularTodo();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('statusDot').classList.add('offline');
+                document.getElementById('statusText').textContent = 'Sin conexión';
+                errEl.textContent = `⚠️ No se pudo conectar a Binance (CORS). Ingresa las tasas manualmente abajo.`;
+                errEl.style.display = 'block';
+            } finally {
+                btn.classList.remove('loading');
+            }
+        }
+
+        // ═══════════════════════════════════════
+        // MANUAL INPUT
+        // ═══════════════════════════════════════
+        function onManualChange() {
+            const ves = parseFloat(document.getElementById('manualVes').value);
+            const cop = parseFloat(document.getElementById('manualCop').value);
+
+            if (!isNaN(ves) && ves > 0) {
+                state.priceVes = ves;
+                document.getElementById('priceVes').textContent = formatNum(ves, 2);
+                document.getElementById('nickVes').textContent = 'Manual';
+            }
+            if (!isNaN(cop) && cop > 0) {
+                state.priceCop = cop;
+                document.getElementById('priceCop').textContent = formatNum(cop, 0);
+                document.getElementById('nickCop').textContent = 'Manual';
+            }
+
+            calcularTodo();
+        }
+
+        // ═══════════════════════════════════════
+        // CÁLCULO PRINCIPAL
+        // ═══════════════════════════════════════
+        function calcularTodo() {
+            const f3 = state.priceVes; // VES/USDT
+            const b7 = state.priceCop; // COP/USDT
+
+            if (!f3 || !b7) return;
+
+            const comPct = parseFloat(document.getElementById('paramCom').value) / 100 || 0.05;
+            const margen = parseFloat(document.getElementById('paramMargen').value) || 100;
+            const fee1Pct = parseFloat(document.getElementById('paramFee1').value) / 100 || 0.001;
+            const fee2Pct = parseFloat(document.getElementById('paramFee2').value) / 100 || 0.001;
+            const objetivo = parseFloat(document.getElementById('paramObj').value) || 1.20;
+
+            const b6 = b7 + margen; // Tasa de venta COP
+            const clientCOP = parseFloat(document.getElementById('clientAmount').value) || 0;
+
+            // ─── Calcular tasa del día (COP/VES) ───
+            const comFactor = 1 - comPct;
+            const fee1Factor = 1 - fee1Pct;
+            const fee2Factor = 1 - fee2Pct;
+            const gananciaBs = objetivo * f3;
+
+            const deduccionesFactor = comFactor * fee1Factor * fee2Factor;
+
+            // Para obtener la tasa final que incluya ganancia, calculamos
+            // cuántas COP por VES entregamos:
+            const vesPerCOP = deduccionesFactor / b6 * f3;
+            const vesSinGanancia = clientCOP * vesPerCOP;
+            const vesEntrega = vesSinGanancia - gananciaBs;
+            const j1 = clientCOP / vesEntrega;
+            const j1Rounded = Math.ceil(j1 * 10) / 10;
+            state.tasaCliente = j1Rounded;
+
+            // ─── Update de UI ───
+            document.getElementById('resultBs').textContent = formatNum(Math.max(0, vesEntrega), 2);
+            document.getElementById('bkMonto').textContent = `${formatNum(clientCOP, 0)} COP`;
+            document.getElementById('bkJ1').textContent = formatNum(j1, 4);
+            document.getElementById('bkFinal').textContent = `Bs ${formatNum(Math.max(0, vesEntrega), 2)}`;
+            document.getElementById('bkTasaRound').textContent = `${formatNum(j1Rounded, 1)} (redondeada)`;
+
+            // ─── TASA DEL DÍA card ───
+            document.getElementById('rateJ1Display').textContent = formatNum(j1, 4);
+            document.getElementById('rateInverse').textContent = formatNum(1 / j1, 6);
+            document.getElementById('rdVes').textContent = formatNum(f3, 2);
+            document.getElementById('rdCop').textContent = formatNum(b7, 0);
+            document.getElementById('rdVenta').textContent = formatNum(b6, 0);
+
+            // ─── TASA REDONDEADA card ───
+            document.getElementById('rateRounded').textContent = j1Rounded.toFixed(1);
+            document.getElementById('rrExact').textContent = formatNum(j1, 4);
+            document.getElementById('rrRound').textContent = j1Rounded.toFixed(1);
+            document.getElementById('rrEjemplo10k').textContent = formatNum(10000 / j1Rounded, 2) + ' Bs';
+            document.getElementById('rrEjemplo50k').textContent = formatNum(50000 / j1Rounded, 2) + ' Bs';
+            document.getElementById('rrEjemplo100k').textContent = formatNum(100000 / j1Rounded, 2) + ' Bs';
+
+            // Ganancia
+            document.getElementById('profitValue').textContent = `$${objetivo.toFixed(2)}`;
+            document.getElementById('profitObj').textContent = objetivo.toFixed(2);
+
+            const profitCard = document.getElementById('profitCard');
+            if (vesEntrega < 0) {
+                profitCard.classList.add('negative');
+                document.getElementById('profitValue').textContent = '⚠️ Pérdida';
+            } else {
+                profitCard.classList.remove('negative');
+            }
+
+            // Recalcular el monto editable con la nueva tasa
+            calcularMontoDividido();
+        }
+
+        // ═══════════════════════════════════════
+        // DIVIDIR MONTO EDITABLE (Monto ÷ Tasa)
+        // ═══════════════════════════════════════
+        function calcularMontoDividido() {
+            const monto = parseFloat(document.getElementById('montoDividir').value);
+            const tasa = state.tasaCliente;
+
+            if (!isNaN(monto) && monto > 0 && tasa) {
+                const resultado = monto / tasa;
+                document.getElementById('resultBs').textContent = formatNum(resultado, 2);
+                document.getElementById('bkFinal').textContent = `Bs ${formatNum(resultado, 2)}`;
+            }
+        }
+
+        // ═══════════════════════════════════════
+        // UTILS
+        // ═══════════════════════════════════════
+        function formatNum(n, decimals) {
+            return n.toLocaleString('es-CO', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+            });
+        }
+
+        // ═══════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════
+        window.addEventListener('DOMContentLoaded', () => {
+            // Try to fetch from Binance on load
+            fetchPrices();
+        });
+    </script>
+
+</body>
+
+</html>
