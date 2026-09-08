@@ -1000,8 +1000,8 @@
 
         <!-- FOOTER -->
         <div class="footer">
-            Remesa P2P v1.0 — Prototipo de prueba<br>
-            Los precios provienen de Binance P2P (comerciantes no verificados)
+            Remesa P2P v1.0 — App Web + Proxy<br>
+            Precios en vivo vía proxy serverless a Binance P2P
         </div>
 
     </div>
@@ -1019,44 +1019,9 @@
         };
 
         // ═══════════════════════════════════════
-        // BINANCE P2P API
+        // BINANCE P2P API  (vía proxy serverless)
         // ═══════════════════════════════════════
-        const API_URL = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
-
-        async function fetchOrders(fiat, payType) {
-            const payload = {
-                asset: 'USDT',
-                fiat: fiat,
-                merchantCheck: false,
-                page: 1,
-                rows: 20,
-                tradeType: 'BUY',
-                payTypes: [payType],
-                classifies: ['mass', 'profession'],
-            };
-
-            const resp = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const json = await resp.json();
-            return json.data || [];
-        }
-
-        function bestUnverifiedBuy(orders) {
-            const unverified = orders.filter(o => o.advertiser.userType === 'user');
-            if (unverified.length === 0) return { price: null, nick: null };
-            unverified.sort((a, b) => parseFloat(a.adv.price) - parseFloat(b.adv.price));
-            return {
-                price: parseFloat(unverified[0].adv.price),
-                nick: unverified[0].advertiser.nickName,
-            };
-        }
+        const API_URL = '/api/prices';
 
         async function fetchPrices() {
             const btn = document.getElementById('btnUpdate');
@@ -1065,15 +1030,15 @@
             errEl.style.display = 'none';
 
             try {
-                const [vesOrders, copOrders] = await Promise.all([
-                    fetchOrders('VES', 'Mercantil'),
-                    fetchOrders('COP', 'BancolombiaSA'),
-                ]);
+                const resp = await fetch(API_URL);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                if (!data.ok) throw new Error(data.error || 'Proxy error');
 
-                const ves = bestUnverifiedBuy(vesOrders);
-                const cop = bestUnverifiedBuy(copOrders);
+                const ves = data.ves || {};
+                const cop = data.cop || {};
 
-                if (ves.price !== null) {
+                if (ves.price != null) {
                     state.priceVes = ves.price;
                     state.nickVes = ves.nick;
                     document.getElementById('priceVes').textContent = formatNum(ves.price, 2);
@@ -1081,7 +1046,7 @@
                     document.getElementById('manualVes').value = ves.price;
                 }
 
-                if (cop.price !== null) {
+                if (cop.price != null) {
                     state.priceCop = cop.price;
                     state.nickCop = cop.nick;
                     document.getElementById('priceCop').textContent = formatNum(cop.price, 0);
@@ -1098,7 +1063,7 @@
                 console.error(err);
                 document.getElementById('statusDot').classList.add('offline');
                 document.getElementById('statusText').textContent = 'Sin conexión';
-                errEl.textContent = `⚠️ No se pudo conectar a Binance (CORS). Ingresa las tasas manualmente abajo.`;
+                errEl.textContent = `⚠️ No se pudieron obtener precios en vivo. Ingresa las tasas manualmente abajo.`;
                 errEl.style.display = 'block';
             } finally {
                 btn.classList.remove('loading');
@@ -1229,6 +1194,13 @@
         window.addEventListener('DOMContentLoaded', () => {
             // Try to fetch from Binance on load
             fetchPrices();
+            // Auto-refresh every 5 minutes
+            setInterval(() => {
+                const dot = document.getElementById('statusDot');
+                if (dot && !dot.classList.contains('offline')) {
+                    fetchPrices();
+                }
+            }, 300000);
         });
     </script>
 

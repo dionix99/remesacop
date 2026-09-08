@@ -1,0 +1,13 @@
+{
+  "name": "remesa-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remesa P2P — Calculadora de arbitraje con proxy a Binance",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo \"No build step required\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
