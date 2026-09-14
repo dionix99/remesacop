@@ -886,6 +886,93 @@
             color: var(--accent-orange);
             font-weight: 600;
         }
+
+        /* ─── IMAGEN TAB ─── */
+        .img-mode-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .img-mode-toggle .tab-btn {
+            background: var(--glass);
+        }
+
+        .img-drop {
+            display: block;
+            text-align: center;
+            padding: 26px 12px;
+            border: 2px dashed var(--border-glow);
+            border-radius: 14px;
+            background: rgba(78, 140, 255, 0.06);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            transition: all .3s;
+        }
+
+        .img-drop:hover {
+            border-color: var(--accent-blue);
+            color: var(--text);
+        }
+
+        .img-note {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .img-preview {
+            margin-top: 6px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #000;
+        }
+
+        .img-preview img {
+            width: 100%;
+            display: block;
+        }
+
+        .img-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .img-webhook {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .img-webhook label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 6px;
+        }
+
+        .img-webhook input {
+            width: 100%;
+            background: rgba(0, 0, 0, .3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .img-webhook input:focus {
+            border-color: var(--accent-blue);
+        }
     </style>
 </head>
 
@@ -912,6 +999,7 @@
         <div class="tabs">
             <button class="tab-btn active" id="tabBtnCalc" onclick="switchTab('calc')">🧮 Calculadora</button>
             <button class="tab-btn" id="tabBtnParams" onclick="switchTab('params')">⚙️ Parámetros</button>
+            <button class="tab-btn" id="tabBtnImg" onclick="switchTab('img')">🖼️ Imagen</button>
         </div>
 
         <!-- ══════════════════════ CALCULADORA TAB ══════════════════════ -->
@@ -1110,6 +1198,71 @@
 
         </div><!-- /tabParams -->
 
+        <!-- ══════════════════════ IMAGEN TAB ══════════════════════ -->
+        <div class="tab-panel" id="tabImg">
+
+            <div class="card">
+                <div class="card-title"><span class="icon">🖼️</span> Imagen con la Tasa del Día</div>
+
+                <div class="img-mode-toggle">
+                    <button class="tab-btn active" id="modeTemplate" onclick="setImgMode('template')">🖼️ Plantilla</button>
+                    <button class="tab-btn" id="modeUpload" onclick="setImgMode('upload')">📷 Tu imagen</button>
+                </div>
+
+                <!-- MODO: SUBIR IMAGEN -->
+                <div id="imgUploadBox" style="display:none">
+                    <label class="img-drop" for="imgFile">
+                        📷 Toca para subir tu imagen (JPG/PNG)
+                        <input type="file" id="imgFile" accept="image/jpeg,image/png" hidden onchange="onImgFile(event)">
+                    </label>
+                    <div class="img-note">La tasa se imprimirá encima en grande.</div>
+                </div>
+
+                <!-- MODO: PLANTILLA -->
+                <div id="imgTemplateBox"></div>
+
+                <div class="input-group">
+                    <label>Tasa a mostrar (tasa para el cliente)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="imgRate" step="0.01" placeholder="3.70" oninput="onImgRateChange()">
+                        <div class="input-suffix">COP</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Posición de la tasa — X%, Y%, tamaño</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="imgPosX" value="81" min="0" max="100" step="1" oninput="onImgPosChange()">
+                        <input type="number" id="imgPosY" value="51" min="0" max="100" step="1" oninput="onImgPosChange()">
+                        <input type="number" id="imgSize" value="100" min="40" max="400" step="5" oninput="onImgPosChange()">
+                    </div>
+                    <div class="img-note">Haz clic sobre la vista previa para colocar la tasa dentro del rectángulo.</div>
+                </div>
+
+                <canvas id="imgCanvas" width="1080" height="1080" style="display:none"></canvas>
+
+                <!-- PREVIEW -->
+                <div class="img-preview" id="imgPreviewBox" style="display:none">
+                    <img id="imgResult" alt="Vista previa" style="cursor:crosshair" onclick="onClickPreview(event)">
+                </div>
+
+                <div class="img-actions">
+                    <button type="button" class="btn-update" onclick="downloadImg()">⬇️ Descargar JPG</button>
+                    <button type="button" class="btn-update" id="btnSend" style="background:linear-gradient(135deg,#00e89d,#00b578)"
+                        onclick="sendImg()">✈️ Enviar por Telegram</button>
+                </div>
+
+                <div class="img-webhook">
+                    <label>Webhook de Telegram (enlace del túnel)</label>
+                    <input type="text" id="imgWebhook" placeholder="https://xxx.trycloudflare.com/webhook/imagen-tasa"
+                        oninput="guardarWebhook()">
+                </div>
+                <div class="error-msg" id="imgError" style="margin-top:8px"></div>
+                <div class="timestamp" id="imgMsg">La tasa se toma automáticamente de los precios en vivo.</div>
+            </div>
+
+        </div><!-- /tabImg -->
+
         <!-- FOOTER -->
         <div class="footer">
             Remesa P2P v1.0 — App Web + Proxy<br>
@@ -1170,7 +1323,11 @@
                 document.getElementById('statusText').textContent = 'En línea';
                 document.getElementById('lastUpdate').textContent = `Actualizado: ${new Date().toLocaleTimeString('es')}`;
 
-                calcularTodo();
+calcularTodo();
+                if (!imgRateTouched && state.tasaCliente) {
+                    document.getElementById('imgRate').value = state.tasaCliente;
+                    if (document.getElementById('tabImg').classList.contains('active')) renderImg();
+                }
             } catch (err) {
                 console.error(err);
                 document.getElementById('statusDot').classList.add('offline');
@@ -1294,8 +1451,181 @@
         function switchTab(name) {
             document.getElementById('tabBtnCalc').classList.toggle('active', name === 'calc');
             document.getElementById('tabBtnParams').classList.toggle('active', name === 'params');
+            document.getElementById('tabBtnImg').classList.toggle('active', name === 'img');
             document.getElementById('tabCalc').classList.toggle('active', name === 'calc');
             document.getElementById('tabParams').classList.toggle('active', name === 'params');
+            document.getElementById('tabImg').classList.toggle('active', name === 'img');
+            if (name === 'img') renderImg();
+        }
+
+        // ═══════════════════════════════════════
+        // IMAGEN CON TASA DEL DÍA
+        // ═══════════════════════════════════════
+        let imgMode = 'template';
+        let imgFileData = null;
+        let imgRateTouched = false;
+        const webhookDefault = 'https://cigarettes-handbook-protecting-canberra.trycloudflare.com/webhook/imagen-tasa'; // ← URL del túnel (cambia al reiniciar el túnel)
+
+        function setImgMode(mode) {
+            imgMode = mode;
+            document.getElementById('modeTemplate').classList.toggle('active', mode === 'template');
+            document.getElementById('modeUpload').classList.toggle('active', mode === 'upload');
+            document.getElementById('imgTemplateBox').style.display = mode === 'template' ? '' : 'none';
+            document.getElementById('imgUploadBox').style.display = mode === 'upload' ? '' : 'none';
+            document.getElementById('imgPreviewBox').style.display = (mode === 'upload' && !imgFileData) ? 'none' : '';
+            renderImg();
+        }
+
+        function onImgFile(e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = () => {
+                imgFileData = r.result;
+                document.getElementById('imgPreviewBox').style.display = '';
+                renderImg();
+            };
+            r.readAsDataURL(f);
+        }
+
+        function onImgRateChange() {
+            imgRateTouched = true;
+            renderImg();
+        }
+
+        function guardarWebhook() {
+            localStorage.setItem('remesa_webhook', document.getElementById('imgWebhook').value.trim());
+        }
+
+        function tasaFormateada() {
+            const v = parseFloat(document.getElementById('imgRate').value);
+            if (!isNaN(v) && v > 0) return v;
+            return state.tasaCliente || state.priceVes || null;
+        }
+
+        function loadImg(src) {
+            return new Promise(res => {
+                const im = new Image();
+                im.onload = () => res(im);
+                im.onerror = () => res(null);
+                im.src = src;
+            });
+        }
+
+        function fmtTasa(n) {
+            return n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function renderImg() {
+            const cv = document.getElementById('imgCanvas');
+            const W = 1080, H = 1080;
+            cv.width = W;
+            cv.height = H;
+            const ctx = cv.getContext('2d');
+            const tasa = tasaFormateada();
+
+            let im = null;
+            if (imgMode === 'upload' && imgFileData) {
+                im = await loadImg(imgFileData);
+            } else {
+                im = await loadImg(plantillaUrl);
+            }
+
+            if (im) {
+                const scale = Math.max(W / im.width, H / im.height);
+                const dw = im.width * scale, dh = im.height * scale;
+                ctx.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
+            } else {
+                const g = ctx.createLinearGradient(0, 0, W, H);
+                g.addColorStop(0, '#0a0a14');
+                g.addColorStop(0.5, '#101c3d');
+                g.addColorStop(1, '#083b30');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            // ─── LA TASA en la posición configurada ───
+            const x = W * imgPosX / 100;
+            const y = H * imgPosY / 100;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.shadowBlur = 18;
+            ctx.font = '900 ' + imgSize + 'px Inter, Arial, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(tasa != null ? fmtTasa(tasa) : '—', x, y);
+            ctx.shadowBlur = 0;
+
+            document.getElementById('imgResult').src = cv.toDataURL('image/jpeg', 0.92);
+        }
+
+        const plantillaUrl = 'imagenes/plantilla-remesa.jpg';
+        let imgPosX, imgPosY, imgSize;
+        (function () {
+            const px = parseFloat(localStorage.getItem('remesa_imgposx'));
+            const py = parseFloat(localStorage.getItem('remesa_imgposy'));
+            const ps = parseFloat(localStorage.getItem('remesa_imgsize'));
+            imgPosX = isNaN(px) ? 81 : px;
+            imgPosY = isNaN(py) ? 51 : py;
+            imgSize = isNaN(ps) ? 100 : ps;
+            const ex = document.getElementById('imgPosX');
+            if (ex) {
+                ex.value = imgPosX;
+                document.getElementById('imgPosY').value = imgPosY;
+                document.getElementById('imgSize').value = imgSize;
+            }
+        })();
+
+        function onImgPosChange() {
+            imgPosX = Math.min(100, Math.max(0, parseFloat(document.getElementById('imgPosX').value) || 81));
+            imgPosY = Math.min(100, Math.max(0, parseFloat(document.getElementById('imgPosY').value) || 51));
+            imgSize = Math.min(400, Math.max(40, parseFloat(document.getElementById('imgSize').value) || 100));
+            localStorage.setItem('remesa_imgposx', imgPosX);
+            localStorage.setItem('remesa_imgposy', imgPosY);
+            localStorage.setItem('remesa_imgsize', imgSize);
+            renderImg();
+        }
+
+        function onClickPreview(e) {
+            const img = document.getElementById('imgResult');
+            const r = img.getBoundingClientRect();
+            const pctX = Math.round((e.clientX - r.left) / r.width * 100);
+            const pctY = Math.round((e.clientY - r.top) / r.height * 100);
+            document.getElementById('imgPosX').value = Math.min(100, Math.max(0, pctX));
+            document.getElementById('imgPosY').value = Math.min(100, Math.max(0, pctY));
+            onImgPosChange();
+        }
+
+        function downloadImg() {
+            const a = document.createElement('a');
+            a.download = 'tasa-remesa-cop.jpg';
+            a.href = document.getElementById('imgCanvas').toDataURL('image/jpeg', 0.92);
+            a.click();
+        }
+
+        async function sendImg() {
+            const url = (document.getElementById('imgWebhook').value || webhookDefault).trim();
+            const err = document.getElementById('imgError');
+            const msg = document.getElementById('imgMsg');
+            if (!url) {
+                err.textContent = '⚠️ Falta la URL del webhook de Telegram.';
+                err.style.display = 'block';
+                return;
+            }
+            err.style.display = 'none';
+            const img = document.getElementById('imgCanvas').toDataURL('image/jpeg', 0.92);
+            msg.textContent = '⏳ Enviando a Telegram…';
+            try {
+                const r = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: img, caption: '📊 Tasa Remesa COP' }),
+                });
+                msg.textContent = r.ok ? '✅ Imagen enviada a Telegram.' : ('⚠️ Error ' + r.status + ' — revisa el túnel/webhook.');
+            } catch (e) {
+                err.textContent = '⚠️ No se pudo enviar: ' + e.message;
+                err.style.display = 'block';
+            }
         }
 
         // ═══════════════════════════════════════
@@ -1312,6 +1642,10 @@
         // INIT
         // ═══════════════════════════════════════
         window.addEventListener('DOMContentLoaded', () => {
+            // Imagen: restaurar configuración guardada
+            const savedWh = localStorage.getItem('remesa_webhook');
+            if (savedWh) document.getElementById('imgWebhook').value = savedWh;
+            setImgMode('template');
             // Try to fetch from Binance on load
             fetchPrices();
             // Auto-refresh every 5 minutes
