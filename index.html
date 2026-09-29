@@ -362,6 +362,7 @@
 
         .input-wrapper input {
             flex: 1;
+            min-width: 0;
             background: transparent;
             border: none;
             padding: 14px 16px;
@@ -943,35 +944,50 @@
             margin-top: 12px;
         }
 
-        .img-webhook {
-            margin-top: 14px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
+        /* ─── DÓLAR BCV ─── */
+        .price-value.bcv {
+            color: var(--accent-green);
         }
 
-        .img-webhook label {
-            display: block;
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            margin-bottom: 6px;
+        .result-usd {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-top: 8px;
         }
 
-        .img-webhook input {
-            width: 100%;
-            background: rgba(0, 0, 0, .3);
+        .result-usd:empty {
+            display: none;
+        }
+
+        /* ─── MENSAJE WHATSAPP ─── */
+        .wa-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .wa-check input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-green);
+        }
+
+        .wa-preview {
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px;
-            color: var(--text);
-            font-size: 12px;
+            border-radius: 12px;
+            padding: 14px;
             font-family: 'Inter', sans-serif;
-            outline: none;
-        }
-
-        .img-webhook input:focus {
-            border-color: var(--accent-blue);
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text);
+            white-space: pre-wrap;
+            word-break: break-word;
         }
     </style>
 </head>
@@ -1010,7 +1026,7 @@
 
         <!-- PRECIOS BINANCE -->
         <div class="card">
-            <div class="card-title"><span class="icon">📡</span> Precios Binance P2P (USDT)</div>
+            <div class="card-title"><span class="icon">📡</span> Precios en vivo</div>
 
             <div class="price-row">
                 <div>
@@ -1034,10 +1050,21 @@
                 </div>
             </div>
 
+            <div class="price-row">
+                <div>
+                    <div class="price-label"><span class="flag">🏦</span> Dólar BCV (oficial)</div>
+                    <div class="price-nick" id="nickBcv">—</div>
+                </div>
+                <div style="text-align:right">
+                    <div class="price-value bcv" id="priceBcv">—</div>
+                    <div class="price-nick">Bs / USD</div>
+                </div>
+            </div>
+
             <!-- Manual override -->
             <div class="divider" style="margin-top:14px"></div>
             <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">✏️ Editar tasas manualmente (si no
-                carga Binance):</div>
+                cargan en vivo):</div>
             <div class="manual-rates">
                 <div class="manual-rate">
                     <label>VES / USDT</label>
@@ -1047,86 +1074,102 @@
                     <label>COP / USDT</label>
                     <input type="number" id="manualCop" step="1" placeholder="3107" oninput="onManualChange()">
                 </div>
+                <div class="manual-rate" style="grid-column:1 / -1">
+                    <label>Dólar BCV (Bs / USD)</label>
+                    <input type="number" id="manualBcv" step="0.01" placeholder="190.50" oninput="onManualChange()">
+                </div>
             </div>
 
             <div class="timestamp" id="lastUpdate">Sin actualizar</div>
         </div>
 
         <!-- ═══════════════════════════════════════════ -->
-        <!-- TASA REDONDEADA (PARA EL CLIENTE) -->
+        <!-- TASA PARA EL CLIENTE -->
         <!-- ═══════════════════════════════════════════ -->
         <div class="rate-rounded-card">
             <div class="rr-label">⬆️ Tasa para el Cliente</div>
-            <div class="rr-sub">Redondeada hacia arriba</div>
-            <div class="rr-value" id="rateRounded">—</div>
-            <div class="rr-detail">
-                <div class="rr-detail-item">
-                    <div class="rrdl">Si envía 20,000 COP</div>
-                    <div class="rrdv" id="rrEjemplo20k">— Bs</div>
-                </div>
-                <div class="rr-detail-item">
-                    <div class="rrdl">Si envía 50,000 COP</div>
-                    <div class="rrdv" id="rrEjemplo50k">— Bs</div>
-                </div>
-                <div class="rr-detail-item">
-                    <div class="rrdl">Si envía 100,000 COP</div>
-                    <div class="rrdv" id="rrEjemplo100k">— Bs</div>
-                </div>
-            </div>
+            <div class="rr-sub" id="rateClienteSub">Tasa del día + 0,02</div>
+            <div class="rr-value" id="rateCliente">—</div>
         </div>
 
         <!-- ═══════════════════════════════════════════ -->
         <!-- CALCULADORA PARA CLIENTES -->
         <!-- ═══════════════════════════════════════════ -->
         <div class="card">
-            <div class="card-title"><span class="icon">🧮</span> Calculadora — ¿Cuánto entregar al cliente?</div>
+            <div class="card-title"><span class="icon">🧮</span> Calculadora</div>
+
+            <div class="img-mode-toggle">
+                <button class="tab-btn active" id="modoCopBs" onclick="setModoCalc('cop')">🇨🇴 COP → Bs 🇻🇪</button>
+                <button class="tab-btn" id="modoBsCop" onclick="setModoCalc('bs')">🇻🇪 Bs → COP 🇨🇴</button>
+            </div>
 
             <div class="calc-section">
-                <div class="input-group" style="display:none">
-                    <label>Referencia</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="clientAmount" placeholder="10000"
-                            value="100000" readonly>
-                        <div class="input-suffix">COP</div>
-                    </div>
-                </div>
-
                 <div class="input-group">
-                    <label>Monto a dividir (COP)</label>
+                    <label id="calcLabel">El cliente envía (COP)</label>
                     <div class="input-wrapper">
-                        <input type="number" id="montoDividir" placeholder="Ingresa monto"
-                            value="100000" oninput="calcularMontoDividido()">
-                        <div class="input-suffix">COP</div>
+                        <input type="number" id="calcMonto" placeholder="Ingresa monto" value="100000"
+                            oninput="actualizarCalculadora()">
+                        <div class="input-suffix" id="calcSuffix">COP</div>
                     </div>
                 </div>
 
                 <!-- RESULTADO PRINCIPAL -->
                 <div class="result-box" id="resultBox">
-                    <div class="result-label">Entregar al cliente</div>
-                    <div class="result-value" id="resultBs">—</div>
-                    <div class="result-sub">bolívares (Bs)</div>
+                    <div class="result-label" id="resultLabel">Entregar al cliente</div>
+                    <div class="result-value" id="resultValue">—</div>
+                    <div class="result-sub" id="resultSub">bolívares (Bs)</div>
+                    <div class="result-usd" id="resultUsd"></div>
                 </div>
 
                 <!-- DESGLOSE -->
                 <div class="breakdown">
-                    <div class="breakdown-row" style="display:none">
-                        <span class="lbl">Referencia</span>
-                        <span class="val" id="bkMonto">—</span>
-                    </div>
                     <div class="breakdown-row">
                         <span class="lbl">Tasa del día (COP/VES)</span>
-                        <span class="val" id="bkJ1">—</span>
+                        <span class="val" id="bkTasaDia">—</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span class="lbl">Tasa para el cliente</span>
+                        <span class="val" id="bkTasaCliente">—</span>
                     </div>
                     <div class="breakdown-row highlight">
-                        <span class="lbl">COP ÷ Tasa = Bs</span>
+                        <span class="lbl" id="bkFormula">COP ÷ Tasa = Bs</span>
                         <span class="val" id="bkFinal">—</span>
                     </div>
-                    <div class="breakdown-row" style="border-top:1px solid var(--border);padding-top:10px;">
-                        <span class="lbl">Tasa redondeada</span>
-                        <span class="val" id="bkTasaRound">—</span>
+                    <div class="breakdown-row">
+                        <span class="lbl">Bs ÷ BCV = USD</span>
+                        <span class="val" id="bkUsd">—</span>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- MENSAJE PARA WHATSAPP -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div class="card">
+            <div class="card-title"><span class="icon">💬</span> Mensaje para WhatsApp</div>
+
+            <div class="input-group">
+                <label>Montos en COP (separados por coma)</label>
+                <div class="input-wrapper">
+                    <input type="text" inputmode="numeric" id="waMontos" value="20000, 50000, 100000, 200000, 500000"
+                        oninput="onWaMontosChange()" style="font-size:15px">
+                </div>
+            </div>
+
+            <label class="wa-check">
+                <input type="checkbox" id="waUsd" checked onchange="onWaUsdChange()">
+                Incluir el valor en dólares (tasa BCV)
+            </label>
+
+            <pre class="wa-preview" id="waPreview">—</pre>
+
+            <div class="img-actions">
+                <button type="button" class="btn-update" onclick="copiarMensaje()">📋 Copiar mensaje</button>
+                <button type="button" class="btn-update" style="background:linear-gradient(135deg,#25d366,#128c7e)"
+                    onclick="enviarWhatsApp()">💬 Enviar por WhatsApp</button>
+            </div>
+            <div class="timestamp" id="waMsg"></div>
         </div>
 
         </div><!-- /tabCalc -->
@@ -1190,6 +1233,10 @@
                         <input type="number" id="paramFee2" value="0.1" step="0.01" oninput="calcularTodo()">
                     </div>
                     <div class="param-item">
+                        <label>Extra tasa cliente (+)</label>
+                        <input type="number" id="paramExtra" value="0.02" step="0.01" oninput="calcularTodo()">
+                    </div>
+                    <div class="param-item">
                         <label>Ganancia obj. (USD equiv.)</label>
                         <input type="number" id="paramObj" value="1.20" step="0.1" oninput="calcularTodo()">
                     </div>
@@ -1224,7 +1271,7 @@
                 <div class="input-group">
                     <label>Tasa a mostrar (tasa para el cliente)</label>
                     <div class="input-wrapper">
-                        <input type="number" id="imgRate" step="0.01" placeholder="3.70" oninput="onImgRateChange()">
+                        <input type="number" id="imgRate" step="0.01" placeholder="3.69" oninput="onImgRateChange()">
                         <div class="input-suffix">COP</div>
                     </div>
                 </div>
@@ -1248,14 +1295,8 @@
 
                 <div class="img-actions">
                     <button type="button" class="btn-update" onclick="downloadImg()">⬇️ Descargar JPG</button>
-                    <button type="button" class="btn-update" id="btnSend" style="background:linear-gradient(135deg,#00e89d,#00b578)"
-                        onclick="sendImg()">✈️ Enviar por Telegram</button>
-                </div>
-
-                <div class="img-webhook">
-                    <label>Webhook de Telegram (enlace del túnel)</label>
-                    <input type="text" id="imgWebhook" placeholder="https://xxx.trycloudflare.com/webhook/imagen-tasa"
-                        oninput="guardarWebhook()">
+                    <button type="button" class="btn-update" id="btnShareImg" style="display:none;background:linear-gradient(135deg,#25d366,#128c7e)"
+                        onclick="compartirImg()">📤 Compartir imagen</button>
                 </div>
                 <div class="error-msg" id="imgError" style="margin-top:8px"></div>
                 <div class="timestamp" id="imgMsg">La tasa se toma automáticamente de los precios en vivo.</div>
@@ -1265,8 +1306,8 @@
 
         <!-- FOOTER -->
         <div class="footer">
-            Remesa P2P v1.0 — App Web + Proxy<br>
-            Precios en vivo vía proxy serverless a Binance P2P
+            Remesa P2P v1.1 — App Web + Proxy<br>
+            Precios en vivo vía Binance P2P · Dólar oficial BCV
         </div>
 
     </div>
@@ -1278,10 +1319,15 @@
         let state = {
             priceVes: null,   // F3
             priceCop: null,   // B7
+            priceBcv: null,   // Bs por dólar (BCV oficial)
             nickVes: null,
             nickCop: null,
-            tasaCliente: null, // tasa redondeada para el cliente
+            tasaDia: null,     // tasa del día (COP por Bs)
+            tasaCliente: null, // tasa del día + extra, la que se le da al cliente
         };
+
+        // Monto de referencia con el que se calcula la tasa del día
+        const REF_COP = 100000;
 
         // ═══════════════════════════════════════
         // BINANCE P2P API  (vía proxy serverless)
@@ -1302,6 +1348,7 @@
 
                 const ves = data.ves || {};
                 const cop = data.cop || {};
+                const bcv = data.bcv || {};
                 const errs = data.errors || {};
 
                 if (ves.price == null && cop.price == null) {
@@ -1310,6 +1357,7 @@
                 const faltan = [];
                 if (ves.price == null) faltan.push(`VES (${errs.ves || 'sin datos'})`);
                 if (cop.price == null) faltan.push(`COP (${errs.cop || 'sin datos'})`);
+                if (bcv.price == null) faltan.push(`dólar BCV (${errs.bcv || 'sin datos'})`);
                 if (faltan.length) {
                     errEl.textContent = `⚠️ No llegó el precio de ${faltan.join(', ')}. Se mantiene el último valor; puedes editarlo manualmente abajo.`;
                     errEl.style.display = 'block';
@@ -1331,15 +1379,19 @@
                     document.getElementById('manualCop').value = cop.price;
                 }
 
+                if (bcv.price != null) {
+                    state.priceBcv = bcv.price;
+                    guardarLocal('remesa_bcv', bcv.price);
+                    document.getElementById('priceBcv').textContent = formatNum(bcv.price, 2);
+                    document.getElementById('nickBcv').textContent = 'En vivo';
+                    document.getElementById('manualBcv').value = bcv.price;
+                }
+
                 document.getElementById('statusDot').classList.remove('offline');
                 document.getElementById('statusText').textContent = 'En línea';
                 document.getElementById('lastUpdate').textContent = `Actualizado: ${new Date().toLocaleTimeString('es')}`;
 
                 calcularTodo();
-                if (!imgRateTouched && state.tasaCliente) {
-                    document.getElementById('imgRate').value = state.tasaCliente;
-                    if (document.getElementById('tabImg').classList.contains('active')) renderImg();
-                }
             } catch (err) {
                 console.error(err);
                 document.getElementById('statusDot').classList.add('offline');
@@ -1357,6 +1409,7 @@
         function onManualChange() {
             const ves = parseFloat(document.getElementById('manualVes').value);
             const cop = parseFloat(document.getElementById('manualCop').value);
+            const bcv = parseFloat(document.getElementById('manualBcv').value);
 
             if (!isNaN(ves) && ves > 0) {
                 state.priceVes = ves;
@@ -1367,6 +1420,12 @@
                 state.priceCop = cop;
                 document.getElementById('priceCop').textContent = formatNum(cop, 0);
                 document.getElementById('nickCop').textContent = 'Manual';
+            }
+            if (!isNaN(bcv) && bcv > 0 && bcv !== state.priceBcv) {
+                state.priceBcv = bcv;
+                guardarLocal('remesa_bcv', bcv);
+                document.getElementById('priceBcv').textContent = formatNum(bcv, 2);
+                document.getElementById('nickBcv').textContent = 'Manual';
             }
 
             calcularTodo();
@@ -1379,7 +1438,10 @@
             const f3 = state.priceVes; // VES/USDT
             const b7 = state.priceCop; // COP/USDT
 
-            if (!f3 || !b7) return;
+            if (!f3 || !b7) {
+                actualizarCalculadora();
+                return;
+            }
 
             // Un campo vacío usa el valor por defecto; un 0 escrito se respeta.
             const comPct = leerNum('paramCom', 5) / 100;
@@ -1387,9 +1449,9 @@
             const fee1Pct = leerNum('paramFee1', 0.1) / 100;
             const fee2Pct = leerNum('paramFee2', 0.1) / 100;
             const objetivo = leerNum('paramObj', 1.20);
+            const extra = leerNum('paramExtra', 0.02);
 
             const b6 = b7 + margen; // Tasa de venta COP
-            const clientCOP = parseFloat(document.getElementById('clientAmount').value) || 0;
 
             // ─── Calcular tasa del día (COP/VES) ───
             const comFactor = 1 - comPct;
@@ -1402,72 +1464,186 @@
             // Para obtener la tasa final que incluya ganancia, calculamos
             // cuántas COP por VES entregamos:
             const vesPerCOP = deduccionesFactor / b6 * f3;
-            const vesSinGanancia = clientCOP * vesPerCOP;
+            const vesSinGanancia = REF_COP * vesPerCOP;
             const vesEntrega = vesSinGanancia - gananciaBs;
-            const j1 = clientCOP / vesEntrega;
+            const j1 = REF_COP / vesEntrega;
 
             const profitCard = document.getElementById('profitCard');
             document.getElementById('profitObj').textContent = objetivo.toFixed(2);
+            document.getElementById('rdVes').textContent = formatNum(f3, 2);
+            document.getElementById('rdCop').textContent = formatNum(b7, 0);
+            document.getElementById('rdVenta').textContent = formatNum(b6, 0);
+            document.getElementById('rateClienteSub').textContent = `Tasa del día + ${formatNum(extra, 2)}`;
 
             // Si con estos parámetros no queda nada para el cliente, la tasa
             // saldría negativa o infinita: no se muestra ni se usa.
             if (!(vesEntrega > 0) || !isFinite(j1)) {
+                state.tasaDia = null;
                 state.tasaCliente = null;
-                ['resultBs', 'bkJ1', 'bkFinal', 'bkTasaRound', 'rateJ1Display', 'rateInverse', 'rateRounded']
+                ['rateJ1Display', 'rateInverse', 'rateCliente']
                     .forEach(id => document.getElementById(id).textContent = '—');
-                ['rrEjemplo20k', 'rrEjemplo50k', 'rrEjemplo100k']
-                    .forEach(id => document.getElementById(id).textContent = '— Bs');
-                document.getElementById('rdVes').textContent = formatNum(f3, 2);
-                document.getElementById('rdCop').textContent = formatNum(b7, 0);
-                document.getElementById('rdVenta').textContent = formatNum(b6, 0);
                 profitCard.classList.add('negative');
                 document.getElementById('profitValue').textContent = '⚠️ Pérdida';
+                actualizarCalculadora();
                 return;
             }
 
-            const j1Rounded = Math.ceil(j1 * 10) / 10;
-            state.tasaCliente = j1Rounded;
-
-            // ─── Update de UI ───
-            document.getElementById('resultBs').textContent = formatNum(Math.max(0, vesEntrega), 2);
-            document.getElementById('bkMonto').textContent = `${formatNum(clientCOP, 0)} COP`;
-            document.getElementById('bkJ1').textContent = formatNum(j1, 4);
-            document.getElementById('bkFinal').textContent = `Bs ${formatNum(Math.max(0, vesEntrega), 2)}`;
-            document.getElementById('bkTasaRound').textContent = `${formatNum(j1Rounded, 1)} (redondeada)`;
+            // Tasa para el cliente: tasa del día + extra, redondeada hacia
+            // arriba a 2 decimales (el 1e-9 evita errores de coma flotante).
+            state.tasaDia = j1;
+            state.tasaCliente = Math.ceil((j1 + extra) * 100 - 1e-9) / 100;
 
             // ─── TASA DEL DÍA card ───
             document.getElementById('rateJ1Display').textContent = formatNum(j1, 4);
             document.getElementById('rateInverse').textContent = formatNum(1 / j1, 6);
-            document.getElementById('rdVes').textContent = formatNum(f3, 2);
-            document.getElementById('rdCop').textContent = formatNum(b7, 0);
-            document.getElementById('rdVenta').textContent = formatNum(b6, 0);
 
-            // ─── TASA REDONDEADA card ───
-            document.getElementById('rateRounded').textContent = j1Rounded.toFixed(1);
-            document.getElementById('rrEjemplo20k').textContent = formatNum(20000 / j1Rounded, 2) + ' Bs';
-            document.getElementById('rrEjemplo50k').textContent = formatNum(50000 / j1Rounded, 2) + ' Bs';
-            document.getElementById('rrEjemplo100k').textContent = formatNum(100000 / j1Rounded, 2) + ' Bs';
+            // ─── TASA PARA EL CLIENTE card ───
+            document.getElementById('rateCliente').textContent = formatNum(state.tasaCliente, 2);
 
             // Ganancia
             document.getElementById('profitValue').textContent = `$${objetivo.toFixed(2)}`;
             profitCard.classList.remove('negative');
 
-            // Recalcular el monto editable con la nueva tasa
-            calcularMontoDividido();
+            // La imagen usa la tasa del cliente mientras no se edite a mano
+            if (!imgRateTouched) {
+                document.getElementById('imgRate').value = state.tasaCliente.toFixed(2);
+                if (document.getElementById('tabImg').classList.contains('active')) renderImg();
+            }
+
+            actualizarCalculadora();
         }
 
         // ═══════════════════════════════════════
-        // DIVIDIR MONTO EDITABLE (Monto ÷ Tasa)
+        // CALCULADORA (COP → Bs  y  Bs → COP)
         // ═══════════════════════════════════════
-        function calcularMontoDividido() {
-            const monto = parseFloat(document.getElementById('montoDividir').value);
-            const tasa = state.tasaCliente;
+        let modoCalc = 'cop';
 
-            if (!isNaN(monto) && monto > 0 && tasa) {
-                const resultado = monto / tasa;
-                document.getElementById('resultBs').textContent = formatNum(resultado, 2);
-                document.getElementById('bkFinal').textContent = `Bs ${formatNum(resultado, 2)}`;
+        function setModoCalc(modo) {
+            // Al cambiar de sentido se pasa el resultado actual como nuevo monto
+            const tasa = state.tasaCliente;
+            const monto = parseFloat(document.getElementById('calcMonto').value);
+            if (modo !== modoCalc && tasa && monto > 0) {
+                document.getElementById('calcMonto').value = modo === 'bs'
+                    ? (monto / tasa).toFixed(2)
+                    : Math.round(monto * tasa);
             }
+            modoCalc = modo;
+            document.getElementById('modoCopBs').classList.toggle('active', modo === 'cop');
+            document.getElementById('modoBsCop').classList.toggle('active', modo === 'bs');
+            document.getElementById('calcLabel').textContent = modo === 'cop'
+                ? 'El cliente envía (COP)' : 'Deben llegar (Bs)';
+            document.getElementById('calcSuffix').textContent = modo === 'cop' ? 'COP' : 'Bs';
+            document.getElementById('resultLabel').textContent = modo === 'cop'
+                ? 'Entregar al cliente' : 'El cliente debe enviar';
+            document.getElementById('resultSub').textContent = modo === 'cop' ? 'bolívares (Bs)' : 'pesos (COP)';
+            document.getElementById('bkFormula').textContent = modo === 'cop'
+                ? 'COP ÷ Tasa = Bs' : 'Bs × Tasa = COP';
+            actualizarCalculadora();
+        }
+
+        function actualizarCalculadora() {
+            const tasa = state.tasaCliente;
+            const bcv = state.priceBcv;
+            const monto = parseFloat(document.getElementById('calcMonto').value);
+
+            document.getElementById('bkTasaDia').textContent = state.tasaDia ? formatNum(state.tasaDia, 4) : '—';
+            document.getElementById('bkTasaCliente').textContent = tasa ? formatNum(tasa, 2) : '—';
+
+            let bs = null, resultado = '—', final = '—';
+            if (tasa && monto > 0) {
+                if (modoCalc === 'cop') {
+                    bs = monto / tasa;
+                    resultado = formatNum(bs, 2);
+                    final = `Bs ${resultado}`;
+                } else {
+                    bs = monto;
+                    const cop = Math.ceil(monto * tasa);
+                    resultado = formatNum(cop, 0);
+                    final = `${resultado} COP`;
+                }
+            }
+            document.getElementById('resultValue').textContent = resultado;
+            document.getElementById('bkFinal').textContent = final;
+
+            const usd = bs != null && bcv ? bs / bcv : null;
+            document.getElementById('resultUsd').textContent = usd != null
+                ? `≈ $${formatNum(usd, 2)} USD a tasa BCV (${formatNum(bcv, 2)})` : '';
+            document.getElementById('bkUsd').textContent = usd != null ? `$${formatNum(usd, 2)}` : '—';
+
+            actualizarMensaje();
+        }
+
+        // ═══════════════════════════════════════
+        // MENSAJE PARA WHATSAPP
+        // ═══════════════════════════════════════
+        // Acepta "20000, 50.000 100000": separa por coma, punto y coma, espacio o salto
+        function leerMontosWa() {
+            return document.getElementById('waMontos').value
+                .split(/[,;\s]+/)
+                .map(t => parseInt(t.replace(/\D/g, ''), 10))
+                .filter(n => n > 0);
+        }
+
+        function onWaMontosChange() {
+            guardarLocal('remesa_wa_montos', document.getElementById('waMontos').value);
+            actualizarMensaje();
+        }
+
+        function onWaUsdChange() {
+            guardarLocal('remesa_wa_usd', document.getElementById('waUsd').checked ? '1' : '0');
+            actualizarMensaje();
+        }
+
+        function construirMensaje() {
+            const tasa = state.tasaCliente;
+            if (!tasa) return null;
+            const bcv = state.priceBcv;
+            const conUsd = document.getElementById('waUsd').checked && bcv;
+            const lineas = [
+                `💱 *Tasa del día: ${formatNum(tasa, 2)}*`,
+                `🇨🇴 COP ➡️ Bs 🇻🇪`,
+                ``,
+            ];
+            leerMontosWa().forEach(cop => {
+                const bs = cop / tasa;
+                let linea = `• ${formatNum(cop, 0)} COP ➡️ *${formatNum(bs, 2)} Bs*`;
+                if (conUsd) linea += ` (≈ $${formatNum(bs / bcv, 2)})`;
+                lineas.push(linea);
+            });
+            if (conUsd) {
+                lineas.push('', `💵 Dólares calculados a tasa BCV: ${formatNum(bcv, 2)} Bs`);
+            }
+            return lineas.join('\n');
+        }
+
+        function actualizarMensaje() {
+            const msg = construirMensaje();
+            document.getElementById('waPreview').textContent = msg || 'Esperando la tasa del día…';
+        }
+
+        async function copiarMensaje() {
+            const msg = construirMensaje();
+            const aviso = document.getElementById('waMsg');
+            if (!msg) { aviso.textContent = '⚠️ Aún no hay tasa del día.'; return; }
+            try {
+                await navigator.clipboard.writeText(msg);
+                aviso.textContent = '✅ Mensaje copiado. Pégalo en WhatsApp.';
+            } catch (e) {
+                // Respaldo para navegadores sin permiso de portapapeles
+                const ta = document.createElement('textarea');
+                ta.value = msg;
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                ta.remove();
+                aviso.textContent = ok ? '✅ Mensaje copiado. Pégalo en WhatsApp.' : '⚠️ No se pudo copiar; usa "Enviar por WhatsApp".';
+            }
+        }
+
+        function enviarWhatsApp() {
+            const msg = construirMensaje();
+            if (!msg) { document.getElementById('waMsg').textContent = '⚠️ Aún no hay tasa del día.'; return; }
+            window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
         }
 
         // ═══════════════════════════════════════
@@ -1516,10 +1692,6 @@
         function onImgRateChange() {
             imgRateTouched = true;
             renderImg();
-        }
-
-        function guardarWebhook() {
-            guardarLocal('remesa_webhook', document.getElementById('imgWebhook').value.trim());
         }
 
         function tasaFormateada() {
@@ -1634,27 +1806,22 @@
             a.click();
         }
 
-        async function sendImg() {
-            const url = document.getElementById('imgWebhook').value.trim();
+        // Compartir la imagen (WhatsApp, etc.) con el menú nativo del teléfono
+        function imagenComoArchivo() {
+            return new Promise(res => document.getElementById('imgCanvas').toBlob(
+                b => res(b ? new File([b], 'tasa-remesa-cop.jpg', { type: 'image/jpeg' }) : null),
+                'image/jpeg', 0.92));
+        }
+
+        async function compartirImg() {
             const err = document.getElementById('imgError');
-            const msg = document.getElementById('imgMsg');
-            if (!url) {
-                err.textContent = '⚠️ Falta la URL del webhook de Telegram. Pégala abajo (se guarda en este dispositivo).';
-                err.style.display = 'block';
-                return;
-            }
             err.style.display = 'none';
-            const img = document.getElementById('imgCanvas').toDataURL('image/jpeg', 0.92);
-            msg.textContent = '⏳ Enviando a Telegram…';
             try {
-                const r = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: img, caption: '📊 Tasa Remesa COP' }),
-                });
-                msg.textContent = r.ok ? '✅ Imagen enviada a Telegram.' : ('⚠️ Error ' + r.status + ' — revisa el túnel/webhook.');
+                const file = await imagenComoArchivo();
+                await navigator.share({ files: [file] });
             } catch (e) {
-                err.textContent = '⚠️ No se pudo enviar: ' + e.message;
+                if (e && e.name === 'AbortError') return; // el usuario cerró el menú
+                err.textContent = '⚠️ No se pudo compartir; usa "Descargar JPG".';
                 err.style.display = 'block';
             }
         }
@@ -1688,10 +1855,27 @@
         // INIT
         // ═══════════════════════════════════════
         window.addEventListener('DOMContentLoaded', () => {
-            // Imagen: restaurar configuración guardada
-            const savedWh = leerLocal('remesa_webhook');
-            if (savedWh) document.getElementById('imgWebhook').value = savedWh;
+            // Restaurar configuración guardada
+            const savedMontos = leerLocal('remesa_wa_montos');
+            if (savedMontos) document.getElementById('waMontos').value = savedMontos;
+            if (leerLocal('remesa_wa_usd') === '0') document.getElementById('waUsd').checked = false;
+            // Último dólar BCV conocido, por si hoy no carga en vivo
+            const savedBcv = parseFloat(leerLocal('remesa_bcv'));
+            if (savedBcv > 0) {
+                state.priceBcv = savedBcv;
+                document.getElementById('priceBcv').textContent = formatNum(savedBcv, 2);
+                document.getElementById('nickBcv').textContent = 'Último guardado';
+                document.getElementById('manualBcv').value = savedBcv;
+            }
+            // Mostrar "Compartir imagen" solo si el teléfono lo permite
+            try {
+                const prueba = new File([''], 'x.jpg', { type: 'image/jpeg' });
+                if (navigator.canShare && navigator.canShare({ files: [prueba] })) {
+                    document.getElementById('btnShareImg').style.display = '';
+                }
+            } catch (e) { }
             setImgMode('template');
+            actualizarCalculadora();
             // Try to fetch from Binance on load
             fetchPrices();
             // Auto-refresh every 5 minutes (también reintenta si quedó sin conexión)

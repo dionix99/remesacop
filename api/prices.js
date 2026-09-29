@@ -1,4 +1,5 @@
 const API_URL = 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
+const BCV_URL = 'https://ve.dolarapi.com/v1/dolares/oficial';
 
 const MARKETS = {
     VES: { fiat: 'VES', payType: 'Mercantil' },
@@ -41,6 +42,16 @@ function bestUnverifiedBuy(orders) {
     };
 }
 
+// Tasa oficial del BCV (Bs por dólar)
+async function fetchBcv() {
+    const resp = await fetch(BCV_URL, { signal: AbortSignal.timeout(10000) });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const json = await resp.json();
+    const price = parseFloat(json.promedio ?? json.venta ?? json.compra);
+    if (!(price > 0)) throw new Error('Respuesta BCV sin tasa');
+    return { price, updatedAt: json.fechaActualizacion || null };
+}
+
 export default async function handler(req, res) {
     // La app llama a /api/prices desde el mismo dominio, así que no se
     // necesitan cabeceras CORS: otros sitios no pueden usar este proxy.
@@ -57,7 +68,12 @@ export default async function handler(req, res) {
     };
 
     try {
+        const bcvPromise = fetchBcv().then(
+            value => ({ value, error: null }),
+            e => ({ value: null, error: String((e && e.message) || e) })
+        );
         const results = await Promise.all([fetchOne('VES'), fetchOne('COP')]);
+        const bcv = await bcvPromise;
 
         const ves = results.find(r => r.key === 'VES');
         const cop = results.find(r => r.key === 'COP');
@@ -67,7 +83,8 @@ export default async function handler(req, res) {
             updatedAt: new Date().toISOString(),
             ves: ves.value,
             cop: cop.value,
-            errors: { ves: ves.error, cop: cop.error },
+            bcv: bcv.value,
+            errors: { ves: ves.error, cop: cop.error, bcv: bcv.error },
         });
     } catch (err) {
         res.status(500).json({ ok: false, error: String((err && err.message) || err) });
