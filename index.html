@@ -1062,7 +1062,7 @@
             <div class="rr-detail">
                 <div class="rr-detail-item">
                     <div class="rrdl">Si envía 20,000 COP</div>
-                    <div class="rrdv" id="rrEjemplo10k">— Bs</div>
+                    <div class="rrdv" id="rrEjemplo20k">— Bs</div>
                 </div>
                 <div class="rr-detail-item">
                     <div class="rrdl">Si envía 50,000 COP</div>
@@ -1302,6 +1302,18 @@
 
                 const ves = data.ves || {};
                 const cop = data.cop || {};
+                const errs = data.errors || {};
+
+                if (ves.price == null && cop.price == null) {
+                    throw new Error(`VES: ${errs.ves || 'sin datos'} · COP: ${errs.cop || 'sin datos'}`);
+                }
+                const faltan = [];
+                if (ves.price == null) faltan.push(`VES (${errs.ves || 'sin datos'})`);
+                if (cop.price == null) faltan.push(`COP (${errs.cop || 'sin datos'})`);
+                if (faltan.length) {
+                    errEl.textContent = `⚠️ No llegó el precio de ${faltan.join(', ')}. Se mantiene el último valor; puedes editarlo manualmente abajo.`;
+                    errEl.style.display = 'block';
+                }
 
                 if (ves.price != null) {
                     state.priceVes = ves.price;
@@ -1323,7 +1335,7 @@
                 document.getElementById('statusText').textContent = 'En línea';
                 document.getElementById('lastUpdate').textContent = `Actualizado: ${new Date().toLocaleTimeString('es')}`;
 
-calcularTodo();
+                calcularTodo();
                 if (!imgRateTouched && state.tasaCliente) {
                     document.getElementById('imgRate').value = state.tasaCliente;
                     if (document.getElementById('tabImg').classList.contains('active')) renderImg();
@@ -1369,11 +1381,12 @@ calcularTodo();
 
             if (!f3 || !b7) return;
 
-            const comPct = parseFloat(document.getElementById('paramCom').value) / 100 || 0.05;
-            const margen = parseFloat(document.getElementById('paramMargen').value) || 100;
-            const fee1Pct = parseFloat(document.getElementById('paramFee1').value) / 100 || 0.001;
-            const fee2Pct = parseFloat(document.getElementById('paramFee2').value) / 100 || 0.001;
-            const objetivo = parseFloat(document.getElementById('paramObj').value) || 1.20;
+            // Un campo vacío usa el valor por defecto; un 0 escrito se respeta.
+            const comPct = leerNum('paramCom', 5) / 100;
+            const margen = leerNum('paramMargen', 100);
+            const fee1Pct = leerNum('paramFee1', 0.1) / 100;
+            const fee2Pct = leerNum('paramFee2', 0.1) / 100;
+            const objetivo = leerNum('paramObj', 1.20);
 
             const b6 = b7 + margen; // Tasa de venta COP
             const clientCOP = parseFloat(document.getElementById('clientAmount').value) || 0;
@@ -1392,6 +1405,26 @@ calcularTodo();
             const vesSinGanancia = clientCOP * vesPerCOP;
             const vesEntrega = vesSinGanancia - gananciaBs;
             const j1 = clientCOP / vesEntrega;
+
+            const profitCard = document.getElementById('profitCard');
+            document.getElementById('profitObj').textContent = objetivo.toFixed(2);
+
+            // Si con estos parámetros no queda nada para el cliente, la tasa
+            // saldría negativa o infinita: no se muestra ni se usa.
+            if (!(vesEntrega > 0) || !isFinite(j1)) {
+                state.tasaCliente = null;
+                ['resultBs', 'bkJ1', 'bkFinal', 'bkTasaRound', 'rateJ1Display', 'rateInverse', 'rateRounded']
+                    .forEach(id => document.getElementById(id).textContent = '—');
+                ['rrEjemplo20k', 'rrEjemplo50k', 'rrEjemplo100k']
+                    .forEach(id => document.getElementById(id).textContent = '— Bs');
+                document.getElementById('rdVes').textContent = formatNum(f3, 2);
+                document.getElementById('rdCop').textContent = formatNum(b7, 0);
+                document.getElementById('rdVenta').textContent = formatNum(b6, 0);
+                profitCard.classList.add('negative');
+                document.getElementById('profitValue').textContent = '⚠️ Pérdida';
+                return;
+            }
+
             const j1Rounded = Math.ceil(j1 * 10) / 10;
             state.tasaCliente = j1Rounded;
 
@@ -1411,21 +1444,13 @@ calcularTodo();
 
             // ─── TASA REDONDEADA card ───
             document.getElementById('rateRounded').textContent = j1Rounded.toFixed(1);
-            document.getElementById('rrEjemplo10k').textContent = formatNum(20000 / j1Rounded, 2) + ' Bs';
+            document.getElementById('rrEjemplo20k').textContent = formatNum(20000 / j1Rounded, 2) + ' Bs';
             document.getElementById('rrEjemplo50k').textContent = formatNum(50000 / j1Rounded, 2) + ' Bs';
             document.getElementById('rrEjemplo100k').textContent = formatNum(100000 / j1Rounded, 2) + ' Bs';
 
             // Ganancia
             document.getElementById('profitValue').textContent = `$${objetivo.toFixed(2)}`;
-            document.getElementById('profitObj').textContent = objetivo.toFixed(2);
-
-            const profitCard = document.getElementById('profitCard');
-            if (vesEntrega < 0) {
-                profitCard.classList.add('negative');
-                document.getElementById('profitValue').textContent = '⚠️ Pérdida';
-            } else {
-                profitCard.classList.remove('negative');
-            }
+            profitCard.classList.remove('negative');
 
             // Recalcular el monto editable con la nueva tasa
             calcularMontoDividido();
@@ -1464,7 +1489,7 @@ calcularTodo();
         let imgMode = 'template';
         let imgFileData = null;
         let imgRateTouched = false;
-        const webhookDefault = 'https://cigarettes-handbook-protecting-canberra.trycloudflare.com/webhook/imagen-tasa'; // ← URL del túnel (cambia al reiniciar el túnel)
+        let imgRenderId = 0;
 
         function setImgMode(mode) {
             imgMode = mode;
@@ -1494,7 +1519,7 @@ calcularTodo();
         }
 
         function guardarWebhook() {
-            localStorage.setItem('remesa_webhook', document.getElementById('imgWebhook').value.trim());
+            guardarLocal('remesa_webhook', document.getElementById('imgWebhook').value.trim());
         }
 
         function tasaFormateada() {
@@ -1517,6 +1542,8 @@ calcularTodo();
         }
 
         async function renderImg() {
+            // Si se piden varios renders seguidos, solo el último pinta
+            const miRender = ++imgRenderId;
             const cv = document.getElementById('imgCanvas');
             const W = 1080, H = 1080;
             cv.width = W;
@@ -1530,6 +1557,9 @@ calcularTodo();
             } else {
                 im = await loadImg(plantillaUrl);
             }
+            // Asegura que la fuente esté cargada antes de dibujar en el canvas
+            try { await document.fonts.load('800 ' + imgSize + 'px Inter'); } catch (e) { }
+            if (miRender !== imgRenderId) return;
 
             if (im) {
                 const scale = Math.max(W / im.width, H / im.height);
@@ -1550,8 +1580,9 @@ calcularTodo();
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
             ctx.shadowBlur = 18;
-            ctx.font = '900 ' + imgSize + 'px Inter, Arial, sans-serif';
+            ctx.font = '800 ' + imgSize + 'px Inter, Arial, sans-serif';
             ctx.fillStyle = '#ffffff';
             ctx.fillText(tasa != null ? fmtTasa(tasa) : '—', x, y);
             ctx.shadowBlur = 0;
@@ -1562,9 +1593,9 @@ calcularTodo();
         const plantillaUrl = 'imagenes/plantilla-remesa.jpg';
         let imgPosX, imgPosY, imgSize;
         (function () {
-            const px = parseFloat(localStorage.getItem('remesa_imgposx'));
-            const py = parseFloat(localStorage.getItem('remesa_imgposy'));
-            const ps = parseFloat(localStorage.getItem('remesa_imgsize'));
+            const px = parseFloat(leerLocal('remesa_imgposx'));
+            const py = parseFloat(leerLocal('remesa_imgposy'));
+            const ps = parseFloat(leerLocal('remesa_imgsize'));
             imgPosX = isNaN(px) ? 81 : px;
             imgPosY = isNaN(py) ? 51 : py;
             imgSize = isNaN(ps) ? 100 : ps;
@@ -1577,12 +1608,12 @@ calcularTodo();
         })();
 
         function onImgPosChange() {
-            imgPosX = Math.min(100, Math.max(0, parseFloat(document.getElementById('imgPosX').value) || 81));
-            imgPosY = Math.min(100, Math.max(0, parseFloat(document.getElementById('imgPosY').value) || 51));
-            imgSize = Math.min(400, Math.max(40, parseFloat(document.getElementById('imgSize').value) || 100));
-            localStorage.setItem('remesa_imgposx', imgPosX);
-            localStorage.setItem('remesa_imgposy', imgPosY);
-            localStorage.setItem('remesa_imgsize', imgSize);
+            imgPosX = Math.min(100, Math.max(0, leerNum('imgPosX', 81)));
+            imgPosY = Math.min(100, Math.max(0, leerNum('imgPosY', 51)));
+            imgSize = Math.min(400, Math.max(40, leerNum('imgSize', 100)));
+            guardarLocal('remesa_imgposx', imgPosX);
+            guardarLocal('remesa_imgposy', imgPosY);
+            guardarLocal('remesa_imgsize', imgSize);
             renderImg();
         }
 
@@ -1604,11 +1635,11 @@ calcularTodo();
         }
 
         async function sendImg() {
-            const url = (document.getElementById('imgWebhook').value || webhookDefault).trim();
+            const url = document.getElementById('imgWebhook').value.trim();
             const err = document.getElementById('imgError');
             const msg = document.getElementById('imgMsg');
             if (!url) {
-                err.textContent = '⚠️ Falta la URL del webhook de Telegram.';
+                err.textContent = '⚠️ Falta la URL del webhook de Telegram. Pégala abajo (se guarda en este dispositivo).';
                 err.style.display = 'block';
                 return;
             }
@@ -1631,6 +1662,21 @@ calcularTodo();
         // ═══════════════════════════════════════
         // UTILS
         // ═══════════════════════════════════════
+        // Lee un número de un input; si está vacío o inválido usa el defecto (0 sí es válido)
+        function leerNum(id, def) {
+            const v = parseFloat(document.getElementById(id).value);
+            return isNaN(v) ? def : v;
+        }
+
+        // localStorage puede fallar (modo privado, almacenamiento bloqueado)
+        function leerLocal(key) {
+            try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+
+        function guardarLocal(key, value) {
+            try { localStorage.setItem(key, value); } catch (e) { }
+        }
+
         function formatNum(n, decimals) {
             return n.toLocaleString('es-CO', {
                 minimumFractionDigits: decimals,
@@ -1643,18 +1689,13 @@ calcularTodo();
         // ═══════════════════════════════════════
         window.addEventListener('DOMContentLoaded', () => {
             // Imagen: restaurar configuración guardada
-            const savedWh = localStorage.getItem('remesa_webhook');
+            const savedWh = leerLocal('remesa_webhook');
             if (savedWh) document.getElementById('imgWebhook').value = savedWh;
             setImgMode('template');
             // Try to fetch from Binance on load
             fetchPrices();
-            // Auto-refresh every 5 minutes
-            setInterval(() => {
-                const dot = document.getElementById('statusDot');
-                if (dot && !dot.classList.contains('offline')) {
-                    fetchPrices();
-                }
-            }, 300000);
+            // Auto-refresh every 5 minutes (también reintenta si quedó sin conexión)
+            setInterval(fetchPrices, 300000);
         });
     </script>
 
