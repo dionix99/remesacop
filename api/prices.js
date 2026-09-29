@@ -18,22 +18,14 @@ function buildPayload(fiat, payType) {
     };
 }
 
-function withTimeout(promise, ms) {
-    return Promise.race([
-        promise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
-    ]);
-}
-
 async function fetchOrders(fiat, payType) {
-    const resp = await withTimeout(
-        fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(buildPayload(fiat, payType)),
-        }),
-        10000
-    );
+    // AbortSignal.timeout cancela la petición de verdad (no solo deja de esperarla)
+    const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildPayload(fiat, payType)),
+        signal: AbortSignal.timeout(10000),
+    });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const json = await resp.json();
     return json.data || [];
@@ -50,18 +42,15 @@ function bestUnverifiedBuy(orders) {
 }
 
 export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+    // La app llama a /api/prices desde el mismo dominio, así que no se
+    // necesitan cabeceras CORS: otros sitios no pueden usar este proxy.
+    res.setHeader('Cache-Control', 'no-store');
 
     const fetchOne = async (key) => {
         try {
             const orders = await fetchOrders(MARKETS[key].fiat, MARKETS[key].payType);
-            return { key, value: bestUnverifiedBuy(orders), error: null };
+            const value = bestUnverifiedBuy(orders);
+            return { key, value, error: value ? null : 'Sin anuncios de vendedores no verificados' };
         } catch (e) {
             return { key, value: null, error: String((e && e.message) || e) };
         }
@@ -70,14 +59,15 @@ export default async function handler(req, res) {
     try {
         const results = await Promise.all([fetchOne('VES'), fetchOne('COP')]);
 
-        const ves = results.find(r => r.key === 'VES').value;
-        const cop = results.find(r => r.key === 'COP').value;
+        const ves = results.find(r => r.key === 'VES');
+        const cop = results.find(r => r.key === 'COP');
 
         res.status(200).json({
             ok: true,
             updatedAt: new Date().toISOString(),
-            ves,
-            cop,
+            ves: ves.value,
+            cop: cop.value,
+            errors: { ves: ves.error, cop: cop.error },
         });
     } catch (err) {
         res.status(500).json({ ok: false, error: String((err && err.message) || err) });
