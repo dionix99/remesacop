@@ -1984,7 +1984,7 @@ function remesaCalc(r) {
   });
 
   /* ───────── imagen con la tasa ───────── */
-  var imgMode = 'template', imgFileData = null, imgRateTouched = false, imgRenderId = 0;
+  var imgMode = 'template', imgFileData = null, imgRateTouched = false, imgRenderId = 0, imgLastPub = null;
   var imgX = parseFloat(lsGet('imx', 81)), imgY = parseFloat(lsGet('imy', 51)), imgS = parseFloat(lsGet('ims', 100));
   if (!isFinite(imgX)) imgX = 81; if (!isFinite(imgY)) imgY = 51; if (!isFinite(imgS)) imgS = 100;
   $('im-x').value = imgX; $('im-y').value = imgY; $('im-s').value = imgS;
@@ -2026,12 +2026,17 @@ function remesaCalc(r) {
   }
   async function renderImg() {
     var mine = ++imgRenderId;
+    /* si la tasa del día cambió, el campo vuelve a seguirla (evita que la imagen quede con una tasa vieja) */
+    if (pub.tasa !== imgLastPub) { imgLastPub = pub.tasa; imgRateTouched = false; }
     if (!imgRateTouched) { var pr = $('im-rate'); if (document.activeElement !== pr) pr.value = pub.tasa ? pub.tasa.toFixed(pubDigits()) : ''; }
     var cv = $('im-cv'), W = 1080, H = 1080;
     cv.width = W; cv.height = H;
     var ctx = cv.getContext('2d');
     var v = parseFloat($('im-rate').value);
     var tasa = isFinite(v) && v > 0 ? v : pub.tasa;
+    $('im-msg').textContent = (tasa && pub.tasa && Math.abs(tasa - pub.tasa) > 0.0049)
+      ? '⚠️ La imagen muestra ' + tasa.toFixed(2) + ' pero la tasa del día es ' + pub.tasa.toFixed(pubDigits()) + '. Borra el campo para igualarla.'
+      : '';
     var im = await loadImg(imgMode === 'upload' && imgFileData ? imgFileData : 'imagenes/plantilla-remesa.jpg');
     try { await document.fonts.load('800 ' + imgS + 'px Inter'); } catch (e) { /* usa la fuente de respaldo */ }
     if (mine !== imgRenderId) return;
