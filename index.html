@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Remesa P2P — Calculadora de Arbitraje</title>
-    <meta name="theme-color" content="#0a0a14">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Remesa P2P">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/iconos/icon-192.png">
-    <link rel="icon" type="image/png" href="/iconos/icon-192.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remesa P2P — Calculadora de Arbitraje</title>
+<meta name="theme-color" content="#0a0a14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Remesa P2P">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/iconos/icon-192.png">
+<link rel="icon" type="image/png" href="/iconos/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
         :root {
             --bg: #0a0a14;
             --bg-card: rgba(18, 18, 35, 0.85);
@@ -989,900 +989,1029 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
-    </style>
+    
+/* ─── Añadidos de esta versión ─── */
+:root {
+  color-scheme: dark;
+  --surface: #12122a; --surface-2: #1a1a36; --field: #0d0d1f;
+  --line: rgba(120,140,255,.18); --line-strong: rgba(120,160,255,.38);
+  --dim: #9499c0; --faint: #5f6489;
+  --blue: #4e8cff; --green: #00e89d; --red: #ff5b76; --orange: #ffb03a; --key: #ffe36b;
+}
+body { font-variant-numeric: tabular-nums; }
+.app { padding-bottom: 96px; }
+.tab-btn { padding: 11px 6px; font-size: 12.5px; }
+.tabs { position: relative; z-index: 2; }
+@media (max-width: 460px) { .tabs { display: grid; grid-template-columns: 1fr 1fr; } }
+.lock-btn { font: inherit; font-size: 12px; font-weight: 700; color: var(--dim); background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 7px 12px; cursor: pointer; }
+button:focus-visible, input:focus-visible, summary:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+h2 { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
+.hint { margin: 10px 0 0; font-size: 12px; color: var(--dim); }
+label.lbl { display: block; font-size: 12px; font-weight: 600; color: var(--dim); margin-bottom: 5px; }
+.plain input, .plain textarea, .grid2 input, textarea, .gate input {
+  width: 100%; min-width: 0; font: inherit; font-size: 16px; color: var(--text); background: var(--field);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+}
+textarea { font-size: 14px; resize: vertical; }
+input.key { border-color: var(--key) !important; }
+input.mini { width: 84px !important; padding: 6px 8px !important; font-size: 14px !important; text-align: right; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.grid2 > div { min-width: 0; }
+.stack > * + * { margin-top: 12px; }
+.btn { font: inherit; font-weight: 600; font-size: 13px; color: var(--text); background: transparent; border: 1px solid var(--line-strong); border-radius: 10px; padding: 9px 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+.btn.primary { color: #fff; border-color: transparent; background: linear-gradient(135deg, var(--blue), #2563eb); }
+.btn.danger { color: var(--red); border-color: rgba(255,91,118,.5); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-block: 16px 12px; }
+.kv { margin: 0; }
+.kv > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-block: 8px; border-bottom: 1px solid var(--line); }
+.kv > div:last-child { border-bottom: 0; }
+.kv dt { color: var(--dim); }
+.kv dd { margin: 0; font-weight: 700; text-align: right; }
+.kv .big dd { font-size: 24px; color: var(--green); }
+.pos { color: var(--green); } .neg { color: var(--red); }
+.tablewrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th, .tbl td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; white-space: normal; color: var(--dim); }
+.tbl th { font-weight: 700; vertical-align: bottom; }
+.tbl th small { display: block; font-weight: 500; color: var(--dim); font-size: 11px; }
+.tbl th em { display: block; font-style: normal; font-weight: 600; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--orange); }
+.tbl tr.hl td { font-weight: 800; color: var(--text); background: var(--surface-2); }
+.tbl tr.hl td:first-child { color: var(--text); }
+details.card { padding: 0; }
+summary { cursor: pointer; padding: 16px 20px; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--dim); }
+details .inner { padding: 0 20px 20px; }
+.pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.pill.pending { color: var(--dim); } .pill.good { color: var(--green); } .pill.mid { color: var(--orange); } .pill.loss { color: var(--red); }
+.remesa { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-block: 10px; }
+.remesa.example { border-style: dashed; opacity: .85; }
+.remesa-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.remesa-name { font-weight: 700; overflow-wrap: anywhere; }
+.remesa-date { font-size: 12px; color: var(--dim); }
+.remesa .kv { margin-top: 8px; }
+.remesa .note { font-size: 12px; color: var(--dim); margin-top: 6px; }
+.editor { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line-strong); }
+.empty-t { margin: 18px 0 4px; font-weight: 700; }
+.tag-ex { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--orange); }
+.gate { text-align: center; padding: 8px 0 4px; }
+.gate .g-ico { font-size: 34px; }
+.gate .g-t { font-weight: 800; font-size: 17px; margin: 6px 0 4px; }
+.gate .g-s { color: var(--dim); font-size: 13px; margin-bottom: 14px; }
+.gate .stack { max-width: 320px; margin-inline: auto; text-align: left; }
+.gate .err { color: var(--red); font-size: 13px; text-align: center; min-height: 1.2em; }
+.pubbox { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pubbox .num { font-size: 26px; font-weight: 800; color: var(--green); }
+.chip { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 10px; border: 1px solid currentColor; }
+.chip.ok { color: var(--green); } .chip.warn { color: var(--orange); }
+.wa-link { background: linear-gradient(135deg,#25d366,#128c7e) !important; text-decoration: none; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); max-width: min(92vw, 420px); background: var(--surface-2); color: var(--text); border: 1px solid var(--line-strong); border-radius: 12px; padding: 10px 16px; font-size: 13px; box-shadow: 0 8px 28px rgba(0,0,0,.5); }
+.toast.err { border-color: var(--red); }
+.img-actions .btn-update { text-decoration: none; }
+@media (max-width: 460px) { .header h1 { font-size: 19px; white-space: nowrap; } .header-right { gap: 6px; } .status { font-size: 10px; padding: 5px 9px; max-width: 120px; } .lock-btn { padding: 6px 10px; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
 </head>
-
 <body>
+<div class="app">
+  <div class="header">
+    <h1>💱 Remesa P2P</h1>
+    <div class="header-right">
+      <button type="button" class="btn-update-header" id="btnUpdateHeader"><div class="spinner"></div><span class="btn-text">🔄 Actualizar</span></button>
+      <button type="button" class="lock-btn" id="lock-btn" hidden>🔒 Bloquear</button>
+      <div class="status" role="status"><div class="status-dot" id="statusDot"></div><span id="statusText">Cargando…</span></div>
+    </div>
+  </div>
 
-    <div class="app">
+  <div class="tabs" role="tablist" aria-label="Secciones">
+    <button type="button" class="tab-btn active" role="tab" data-tab="calc" id="tb-calc" aria-selected="true">🧮 Calculadora</button>
+    <button type="button" class="tab-btn" role="tab" data-tab="img" id="tb-img" aria-selected="false">🖼️ Imagen</button>
+    <button type="button" class="tab-btn" role="tab" data-tab="calculos" id="tb-calculos" aria-selected="false">🔒 Mis cálculos</button>
+    <button type="button" class="tab-btn" role="tab" data-tab="remesas" id="tb-remesas" aria-selected="false">🔒 Remesas</button>
+  </div>
 
-        <!-- HEADER -->
-        <div class="header">
-            <h1>💱 Remesa P2P</h1>
-            <div class="header-right">
-                <button class="btn-update-header" id="btnUpdateHeader" onclick="fetchPrices()">
-                    <div class="spinner"></div>
-                    <span class="btn-text">🔄 Actualizar</span>
-                </button>
-                <div class="status">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">Conectando...</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- TABS -->
-        <div class="tabs">
-            <button class="tab-btn active" id="tabBtnCalc" onclick="switchTab('calc')">🧮 Calculadora</button>
-            <button class="tab-btn" id="tabBtnParams" onclick="switchTab('params')">⚙️ Parámetros</button>
-            <button class="tab-btn" id="tabBtnImg" onclick="switchTab('img')">🖼️ Imagen</button>
-        </div>
-
-        <!-- ══════════════════════ CALCULADORA TAB ══════════════════════ -->
-        <div class="tab-panel active" id="tabCalc">
-
-        <!-- ERROR MESSAGE -->
-        <div class="error-msg" id="errorMsg"></div>
-
-        <!-- PRECIOS BINANCE -->
-        <div class="card">
-            <div class="card-title"><span class="icon">📡</span> Precios en vivo</div>
-
-            <div class="price-row">
-                <div>
-                    <div class="price-label"><span class="flag">🇻🇪</span> VES · Mercantil</div>
-                    <div class="price-nick" id="nickVes">—</div>
-                </div>
-                <div style="text-align:right">
-                    <div class="price-value ves" id="priceVes">—</div>
-                    <div class="price-nick">Bs / USDT</div>
-                </div>
-            </div>
-
-            <div class="price-row">
-                <div>
-                    <div class="price-label"><span class="flag">🇨🇴</span> COP · Bancolombia</div>
-                    <div class="price-nick" id="nickCop">—</div>
-                </div>
-                <div style="text-align:right">
-                    <div class="price-value cop" id="priceCop">—</div>
-                    <div class="price-nick">$ / USDT</div>
-                </div>
-            </div>
-
-            <div class="price-row">
-                <div>
-                    <div class="price-label"><span class="flag">🏦</span> Dólar BCV (oficial)</div>
-                    <div class="price-nick" id="nickBcv">—</div>
-                </div>
-                <div style="text-align:right">
-                    <div class="price-value bcv" id="priceBcv">—</div>
-                    <div class="price-nick">Bs / USD</div>
-                </div>
-            </div>
-
-            <!-- Manual override -->
-            <div class="divider" style="margin-top:14px"></div>
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">✏️ Editar tasas manualmente (si no
-                cargan en vivo):</div>
-            <div class="manual-rates">
-                <div class="manual-rate">
-                    <label>VES / USDT</label>
-                    <input type="number" id="manualVes" step="0.01" placeholder="961.60" oninput="onManualChange()">
-                </div>
-                <div class="manual-rate">
-                    <label>COP / USDT</label>
-                    <input type="number" id="manualCop" step="1" placeholder="3107" oninput="onManualChange()">
-                </div>
-                <div class="manual-rate" style="grid-column:1 / -1">
-                    <label>Dólar BCV (Bs / USD)</label>
-                    <input type="number" id="manualBcv" step="0.01" placeholder="190.50" oninput="onManualChange()">
-                </div>
-            </div>
-
-            <div class="timestamp" id="lastUpdate">Sin actualizar</div>
-        </div>
-
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- TASA PARA EL CLIENTE -->
-        <!-- ═══════════════════════════════════════════ -->
-        <div class="rate-rounded-card">
-            <div class="rr-label">⬆️ Tasa para el Cliente</div>
-            <div class="rr-sub" id="rateClienteSub">Tasa del día + 0,02</div>
-            <div class="rr-value" id="rateCliente">—</div>
-        </div>
-
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- CALCULADORA PARA CLIENTES -->
-        <!-- ═══════════════════════════════════════════ -->
-        <div class="card">
-            <div class="card-title"><span class="icon">🧮</span> Calculadora</div>
-
-            <div class="img-mode-toggle">
-                <button class="tab-btn active" id="modoCopBs" onclick="setModoCalc('cop')">🇨🇴 COP → Bs 🇻🇪</button>
-                <button class="tab-btn" id="modoBsCop" onclick="setModoCalc('bs')">🇻🇪 Bs → COP 🇨🇴</button>
-            </div>
-
-            <div class="calc-section">
-                <div class="input-group">
-                    <label id="calcLabel">El cliente envía (COP)</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="calcMonto" placeholder="Ingresa monto" value="100000"
-                            oninput="actualizarCalculadora()">
-                        <div class="input-suffix" id="calcSuffix">COP</div>
-                    </div>
-                </div>
-
-                <!-- RESULTADO PRINCIPAL -->
-                <div class="result-box" id="resultBox">
-                    <div class="result-label" id="resultLabel">Entregar al cliente</div>
-                    <div class="result-value" id="resultValue">—</div>
-                    <div class="result-sub" id="resultSub">bolívares (Bs)</div>
-                    <div class="result-usd" id="resultUsd"></div>
-                </div>
-
-                <!-- DESGLOSE -->
-                <div class="breakdown">
-                    <div class="breakdown-row">
-                        <span class="lbl">Tasa del día (COP/VES)</span>
-                        <span class="val" id="bkTasaDia">—</span>
-                    </div>
-                    <div class="breakdown-row">
-                        <span class="lbl">Tasa para el cliente</span>
-                        <span class="val" id="bkTasaCliente">—</span>
-                    </div>
-                    <div class="breakdown-row highlight">
-                        <span class="lbl" id="bkFormula">COP ÷ Tasa = Bs</span>
-                        <span class="val" id="bkFinal">—</span>
-                    </div>
-                    <div class="breakdown-row">
-                        <span class="lbl">Bs ÷ BCV = USD</span>
-                        <span class="val" id="bkUsd">—</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- MENSAJE PARA WHATSAPP -->
-        <!-- ═══════════════════════════════════════════ -->
-        <div class="card">
-            <div class="card-title"><span class="icon">💬</span> Mensaje para WhatsApp</div>
-
-            <div class="input-group">
-                <label>Montos en COP (separados por coma)</label>
-                <div class="input-wrapper">
-                    <input type="text" inputmode="numeric" id="waMontos" value="20000, 50000, 100000, 200000, 500000"
-                        oninput="onWaMontosChange()" style="font-size:15px">
-                </div>
-            </div>
-
-            <label class="wa-check">
-                <input type="checkbox" id="waUsd" checked onchange="onWaUsdChange()">
-                Incluir el valor en dólares (tasa BCV)
-            </label>
-
-            <pre class="wa-preview" id="waPreview">—</pre>
-
-            <div class="img-actions">
-                <button type="button" class="btn-update" onclick="copiarMensaje()">📋 Copiar mensaje</button>
-                <button type="button" class="btn-update" style="background:linear-gradient(135deg,#25d366,#128c7e)"
-                    onclick="enviarWhatsApp()">💬 Enviar por WhatsApp</button>
-            </div>
-            <div class="timestamp" id="waMsg"></div>
-        </div>
-
-        </div><!-- /tabCalc -->
-
-        <!-- ══════════════════════ PARÁMETROS TAB ══════════════════════ -->
-        <div class="tab-panel" id="tabParams">
-
-            <!-- TASA DEL DÍA -->
-            <div class="rate-card">
-                <div class="rate-card-label">📊 Tasa del Día</div>
-                <div class="rate-card-sublabel">COP → Bolívares</div>
-                <div class="rate-card-value" id="rateJ1Display">—</div>
-                <div class="rate-card-unit">1 COP = <span id="rateInverse">—</span> Bs</div>
-                <div class="rate-card-detail">
-                    <div class="rate-detail-item">
-                        <div class="rdl">VES/USDT</div>
-                        <div class="rdv blue" id="rdVes">—</div>
-                    </div>
-                    <div class="rate-detail-item">
-                        <div class="rdl">COP/USDT</div>
-                        <div class="rdv orange" id="rdCop">—</div>
-                    </div>
-                    <div class="rate-detail-item">
-                        <div class="rdl">Venta COP</div>
-                        <div class="rdv green" id="rdVenta">—</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GANANCIA -->
-            <div class="card">
-                <div class="card-title"><span class="icon">💰</span> Tu Ganancia</div>
-                <div class="profit-card" id="profitCard">
-                    <div>
-                        <div class="profit-label">Ganancia neta estimada</div>
-                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Objetivo: $<span
-                                id="profitObj">1.20</span> USD equiv.</div>
-                    </div>
-                    <div class="profit-value" id="profitValue">$1.20</div>
-                </div>
-            </div>
-
-            <!-- PARÁMETROS -->
-            <div class="card">
-                <div class="card-title"><span class="icon">⚙️</span> Parámetros</div>
-                <div class="params-grid">
-                    <div class="param-item">
-                        <label>Comisión %</label>
-                        <input type="number" id="paramCom" value="5" step="0.5" oninput="calcularTodo()">
-                    </div>
-                    <div class="param-item">
-                        <label>Margen COP (B6-B7)</label>
-                        <input type="number" id="paramMargen" value="100" step="10" oninput="calcularTodo()">
-                    </div>
-                    <div class="param-item">
-                        <label>Fee D1 %</label>
-                        <input type="number" id="paramFee1" value="0.1" step="0.01" oninput="calcularTodo()">
-                    </div>
-                    <div class="param-item">
-                        <label>Fee H1 %</label>
-                        <input type="number" id="paramFee2" value="0.1" step="0.01" oninput="calcularTodo()">
-                    </div>
-                    <div class="param-item">
-                        <label>Extra tasa cliente (+)</label>
-                        <input type="number" id="paramExtra" value="0.02" step="0.01" oninput="calcularTodo()">
-                    </div>
-                    <div class="param-item">
-                        <label>Ganancia obj. (USD equiv.)</label>
-                        <input type="number" id="paramObj" value="1.20" step="0.1" oninput="calcularTodo()">
-                    </div>
-                </div>
-            </div>
-
-        </div><!-- /tabParams -->
-
-        <!-- ══════════════════════ IMAGEN TAB ══════════════════════ -->
-        <div class="tab-panel" id="tabImg">
-
-            <div class="card">
-                <div class="card-title"><span class="icon">🖼️</span> Imagen con la Tasa del Día</div>
-
-                <div class="img-mode-toggle">
-                    <button class="tab-btn active" id="modeTemplate" onclick="setImgMode('template')">🖼️ Plantilla</button>
-                    <button class="tab-btn" id="modeUpload" onclick="setImgMode('upload')">📷 Tu imagen</button>
-                </div>
-
-                <!-- MODO: SUBIR IMAGEN -->
-                <div id="imgUploadBox" style="display:none">
-                    <label class="img-drop" for="imgFile">
-                        📷 Toca para subir tu imagen (JPG/PNG)
-                        <input type="file" id="imgFile" accept="image/jpeg,image/png" hidden onchange="onImgFile(event)">
-                    </label>
-                    <div class="img-note">La tasa se imprimirá encima en grande.</div>
-                </div>
-
-                <!-- MODO: PLANTILLA -->
-                <div id="imgTemplateBox"></div>
-
-                <div class="input-group">
-                    <label>Tasa a mostrar (tasa para el cliente)</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="imgRate" step="0.01" placeholder="3.69" oninput="onImgRateChange()">
-                        <div class="input-suffix">COP</div>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Posición de la tasa — X%, Y%, tamaño</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="imgPosX" value="81" min="0" max="100" step="1" oninput="onImgPosChange()">
-                        <input type="number" id="imgPosY" value="51" min="0" max="100" step="1" oninput="onImgPosChange()">
-                        <input type="number" id="imgSize" value="100" min="40" max="400" step="5" oninput="onImgPosChange()">
-                    </div>
-                    <div class="img-note">Haz clic sobre la vista previa para colocar la tasa dentro del rectángulo.</div>
-                </div>
-
-                <canvas id="imgCanvas" width="1080" height="1080" style="display:none"></canvas>
-
-                <!-- PREVIEW -->
-                <div class="img-preview" id="imgPreviewBox" style="display:none">
-                    <img id="imgResult" alt="Vista previa" style="cursor:crosshair" onclick="onClickPreview(event)">
-                </div>
-
-                <div class="img-actions">
-                    <button type="button" class="btn-update" onclick="downloadImg()">⬇️ Descargar JPG</button>
-                    <button type="button" class="btn-update" id="btnShareImg" style="display:none;background:linear-gradient(135deg,#25d366,#128c7e)"
-                        onclick="compartirImg()">📤 Compartir imagen</button>
-                </div>
-                <div class="error-msg" id="imgError" style="margin-top:8px"></div>
-                <div class="timestamp" id="imgMsg">La tasa se toma automáticamente de los precios en vivo.</div>
-            </div>
-
-        </div><!-- /tabImg -->
-
-        <!-- FOOTER -->
-        <div class="footer">
-            Remesa P2P v1.1 — App Web + Proxy<br>
-            Precios en vivo vía Binance P2P · Dólar oficial BCV
-        </div>
-
+  <!-- ═══════ CALCULADORA (pública) ═══════ -->
+  <div class="tab-panel active" id="tab-calc">
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="rate-rounded-card">
+      <div class="rr-label">⬆️ Tasa para el Cliente</div>
+      <div class="rr-sub" id="rr-sub">Tasa del día</div>
+      <div class="rr-value" id="rr-val">—</div>
     </div>
 
-    <script>
-        // ═══════════════════════════════════════
-        // STATE
-        // ═══════════════════════════════════════
-        let state = {
-            priceVes: null,   // F3
-            priceCop: null,   // B7
-            priceBcv: null,   // Bs por dólar (BCV oficial)
-            nickVes: null,
-            nickCop: null,
-            tasaDia: null,     // tasa del día (COP por Bs)
-            tasaCliente: null, // tasa del día + extra, la que se le da al cliente
-        };
+    <div class="card">
+      <div class="card-title"><span class="icon">🧮</span> Calculadora</div>
+      <div class="img-mode-toggle">
+        <button type="button" class="tab-btn active" id="modo-cop">🇨🇴 COP → Bs 🇻🇪</button>
+        <button type="button" class="tab-btn" id="modo-bs">🇻🇪 Bs → COP 🇨🇴</button>
+      </div>
+      <div class="calc-section">
+        <div class="input-group">
+          <label for="calc-monto" id="calc-label">El cliente envía (COP)</label>
+          <div class="input-wrapper">
+            <input type="number" id="calc-monto" inputmode="decimal" min="0" step="any" placeholder="Ingresa monto" value="100000">
+            <div class="input-suffix" id="calc-suffix">COP</div>
+          </div>
+        </div>
+        <div class="result-box">
+          <div class="result-label" id="res-label">Entregar al cliente</div>
+          <div class="result-value" id="res-val">—</div>
+          <div class="result-sub" id="res-sub">bolívares (Bs)</div>
+          <div class="result-usd" id="res-usd"></div>
+        </div>
+        <div class="breakdown">
+          <div class="breakdown-row"><span class="lbl">Tasa para el cliente</span><span class="val" id="bk-tasa">—</span></div>
+          <div class="breakdown-row highlight"><span class="lbl" id="bk-formula">COP ÷ Tasa = Bs</span><span class="val" id="bk-final">—</span></div>
+          <div class="breakdown-row"><span class="lbl">Bs ÷ BCV = USD</span><span class="val" id="bk-usd">—</span></div>
+        </div>
+      </div>
+    </div>
 
-        // Monto de referencia con el que se calcula la tasa del día
-        const REF_COP = 100000;
+    <div class="card">
+      <div class="card-title"><span class="icon">💬</span> Mensaje para WhatsApp</div>
+      <div class="input-group">
+        <label for="wa-montos">Montos en COP (separados por coma)</label>
+        <div class="input-wrapper"><input type="text" inputmode="numeric" id="wa-montos" value="20000, 50000, 100000, 200000, 500000" style="font-size:15px"></div>
+      </div>
+      <label class="wa-check"><input type="checkbox" id="wa-usd" checked> Incluir el valor en dólares (tasa BCV)</label>
+      <pre class="wa-preview" id="wa-preview">—</pre>
+      <div class="img-actions">
+        <button type="button" class="btn-update" id="wa-copy">📋 Copiar mensaje</button>
+        <a class="btn-update wa-link" id="wa-link" href="https://wa.me/" target="_blank" rel="noopener">💬 Enviar por WhatsApp</a>
+      </div>
+      <div class="timestamp" id="wa-msg"></div>
+    </div>
+  </div>
 
-        // ═══════════════════════════════════════
-        // BINANCE P2P API  (vía proxy serverless)
-        // ═══════════════════════════════════════
-        const API_URL = '/api/prices';
+  <!-- ═══════ IMAGEN (pública) ═══════ -->
+  <div class="tab-panel" id="tab-img">
+    <div class="card">
+      <div class="card-title"><span class="icon">🖼️</span> Imagen con la Tasa del Día</div>
+      <div class="img-mode-toggle">
+        <button type="button" class="tab-btn active" id="im-tpl">🖼️ Plantilla</button>
+        <button type="button" class="tab-btn" id="im-up">📷 Tu imagen</button>
+      </div>
+      <div id="im-upbox" hidden>
+        <label class="img-drop" for="im-file">📷 Toca para subir tu imagen (JPG/PNG)
+          <input type="file" id="im-file" accept="image/jpeg,image/png" hidden>
+        </label>
+        <div class="img-note">La tasa se imprimirá encima en grande.</div>
+      </div>
+      <div class="input-group">
+        <label for="im-rate">Tasa a mostrar (tasa para el cliente)</label>
+        <div class="input-wrapper"><input type="number" id="im-rate" step="0.01" inputmode="decimal" placeholder="3.79"><div class="input-suffix">COP</div></div>
+      </div>
+      <div class="input-group">
+        <label>Posición de la tasa — X%, Y%, tamaño</label>
+        <div class="input-wrapper">
+          <input type="number" id="im-x" value="81" min="0" max="100" step="1" aria-label="Posición X">
+          <input type="number" id="im-y" value="51" min="0" max="100" step="1" aria-label="Posición Y">
+          <input type="number" id="im-s" value="100" min="40" max="400" step="5" aria-label="Tamaño">
+        </div>
+        <div class="img-note">Toca la vista previa para colocar la tasa dentro del rectángulo.</div>
+      </div>
+      <canvas id="im-cv" width="1080" height="1080" hidden></canvas>
+      <div class="img-preview" id="im-prev"><img id="im-out" alt="Vista previa de la imagen con la tasa" style="cursor:crosshair"></div>
+      <div class="img-actions">
+        <button type="button" class="btn-update" id="im-dl">⬇️ Descargar JPG</button>
+        <button type="button" class="btn-update" id="im-share" style="display:none;background:linear-gradient(135deg,#25d366,#128c7e)">📤 Compartir imagen</button>
+      </div>
+      <div class="timestamp" id="im-msg"></div>
+    </div>
+  </div>
 
-        async function fetchPrices() {
-            const btn = document.getElementById('btnUpdateHeader');
-            const errEl = document.getElementById('errorMsg');
-            btn.classList.add('loading');
-            errEl.style.display = 'none';
+  <!-- ═══════ MIS CÁLCULOS (con clave) ═══════ -->
+  <div class="tab-panel" id="tab-calculos">
+    <div class="card" id="gate-calculos" hidden></div>
+    <div id="in-calculos" hidden>
+      <div class="card">
+        <div class="card-title"><span class="icon">📡</span> Precios en vivo</div>
+        <p class="hint" style="margin:0" id="live-note">Se toman de Binance P2P (Mercantil y Bancolombia, vendedores no verificados) al abrir la app y cada 5 minutos.</p>
+        <p class="hint">Tus empleadas y clientes ven la tasa calculada con estos precios y con los valores de fábrica (1,12 USDT, 5 %, fees 0,1 %). Lo que cambies aquí se guarda solo en este dispositivo.</p>
+      </div>
 
-            try {
-                const resp = await fetch(API_URL);
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const data = await resp.json();
-                if (!data.ok) throw new Error(data.error || 'Proxy error');
+      <div class="card plain">
+        <div class="card-title"><span class="icon">✏️</span> Corregir precios (tu colchón)</div>
+        <div class="grid2">
+          <div><label class="lbl" for="c-bs">Bs por USDT</label><input class="key" id="c-bs" data-key="bs" type="number" inputmode="decimal" step="any"></div>
+          <div><label class="lbl" for="c-cop">COP por USDT</label><input class="key" id="c-cop" data-key="cop" type="number" inputmode="decimal" step="any"></div>
+          <div><label class="lbl" for="c-bcv">Dólar BCV (Bs por USD)</label><input class="key" id="c-bcv" data-key="bcv" type="number" inputmode="decimal" step="any"></div>
+        </div>
+        <p class="hint">Estos recuadros amarillos se llenan solos con los precios en vivo; puedes escribir otros para probar y vuelven a los reales al tocar 🔄 Actualizar.</p>
+      </div>
 
-                const ves = data.ves || {};
-                const cop = data.cop || {};
-                const bcv = data.bcv || {};
-                const errs = data.errors || {};
+      <div class="card plain">
+        <div class="card-title"><span class="icon">🎯</span> Tasa a cotizar</div>
+        <label class="lbl" for="c-obj">Ganancia que quieres, en USDT (por <span id="c-monto-lbl">100.000 COP</span>)</label>
+        <input class="key" id="c-obj" data-key="objetivo" type="number" inputmode="decimal" step="any">
+        <dl class="kv" style="margin-top:8px">
+          <div><dt>Tasa exacta</dt><dd id="c-exacta">—</dd></div>
+          <div class="big"><dt>Tasa a cotizar</dt><dd id="c-cotizar">—</dd></div>
+          <div><dt>Bs que recibe el cliente</dt><dd id="c-bscli">—</dd></div>
+          <div><dt>Tu empleada gana</dt><dd id="c-emp">—</dd></div>
+        </dl>
+        <p class="hint" id="c-hint"></p>
+      </div>
 
-                if (ves.price == null && cop.price == null) {
-                    throw new Error(`VES: ${errs.ves || 'sin datos'} · COP: ${errs.cop || 'sin datos'}`);
-                }
-                const faltan = [];
-                if (ves.price == null) faltan.push(`VES (${errs.ves || 'sin datos'})`);
-                if (cop.price == null) faltan.push(`COP (${errs.cop || 'sin datos'})`);
-                if (bcv.price == null) faltan.push(`dólar BCV (${errs.bcv || 'sin datos'})`);
-                if (faltan.length) {
-                    errEl.textContent = `⚠️ No llegó el precio de ${faltan.join(', ')}. Se mantiene el último valor; puedes editarlo manualmente abajo.`;
-                    errEl.style.display = 'block';
-                }
+      <div class="card">
+        <div class="card-title"><span class="icon">🧪</span> Los tres escenarios a esa tasa</div>
+        <div class="tablewrap">
+          <table class="tbl">
+            <thead><tr><th></th>
+              <th>1<small>Base del cliente</small></th>
+              <th>2<small id="th2">COP −30</small><em>solo para mí</em></th>
+              <th>3<small id="th3">COP −30 · Bs +5</small><em>solo para mí</em></th></tr></thead>
+            <tbody>
+              <tr><td>COP por USDT</td><td id="e1-cop"></td><td id="e2-cop"></td><td id="e3-cop"></td></tr>
+              <tr><td>Bs por USDT</td><td id="e1-bs"></td><td id="e2-bs"></td><td id="e3-bs"></td></tr>
+              <tr><td>Bs que obtienes</td><td id="e1-bsobt"></td><td id="e2-bsobt"></td><td id="e3-bsobt"></td></tr>
+              <tr><td>Bs al cliente</td><td id="e1-bscli"></td><td id="e2-bscli"></td><td id="e3-bscli"></td></tr>
+              <tr><td>Ganancia (Bs)</td><td id="e1-gbs"></td><td id="e2-gbs"></td><td id="e3-gbs"></td></tr>
+              <tr class="hl"><td>Ganancia (USDT)</td><td id="e1-gusdt"></td><td id="e2-gusdt"></td><td id="e3-gusdt"></td></tr>
+              <tr><td>Ganancia (COP)</td><td id="e1-gcop"></td><td id="e2-gcop"></td><td id="e3-gcop"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint">La tasa se redondea hacia arriba, así que el escenario 1 gana lo que pediste o un poco más. Ya incluye el pago a tu empleada y los dos fees.</p>
+      </div>
 
-                if (ves.price != null) {
-                    state.priceVes = ves.price;
-                    state.nickVes = ves.nick;
-                    document.getElementById('priceVes').textContent = formatNum(ves.price, 2);
-                    document.getElementById('nickVes').textContent = `@${ves.nick}`;
-                    document.getElementById('manualVes').value = ves.price;
-                }
+      <div class="card">
+        <div class="card-title"><span class="icon">⚔️</span> Si igualas la tasa de otro (ganancia en USDT)</div>
+        <div class="tablewrap">
+          <table class="tbl">
+            <thead><tr><th></th><th>Tasa</th><th>1</th><th>2</th><th>3</th></tr></thead>
+            <tbody>
+              <tr><td>Cambios Calipso</td><td><input class="mini" id="cp-0" data-comp="0" type="number" inputmode="decimal" step="any" aria-label="Tasa de Calipso"></td><td id="cp0-1"></td><td id="cp0-2"></td><td id="cp0-3"></td></tr>
+              <tr><td>Bancos 24</td><td><input class="mini" id="cp-1" data-comp="1" type="number" inputmode="decimal" step="any" aria-label="Tasa de Bancos 24"></td><td id="cp1-1"></td><td id="cp1-2"></td><td id="cp1-3"></td></tr>
+              <tr><td>Otra tasa</td><td><input class="mini" id="cp-2" data-comp="2" type="number" inputmode="decimal" step="any" aria-label="Otra tasa"></td><td id="cp2-1"></td><td id="cp2-2"></td><td id="cp2-3"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="hint">Las tasas de Calipso y Bancos 24 vienen de los flyers del 29/09/2026. Cambian a diario: actualízalas.</p>
+      </div>
 
-                if (cop.price != null) {
-                    state.priceCop = cop.price;
-                    state.nickCop = cop.nick;
-                    document.getElementById('priceCop').textContent = formatNum(cop.price, 0);
-                    document.getElementById('nickCop').textContent = `@${cop.nick}`;
-                    document.getElementById('manualCop').value = cop.price;
-                }
+      <details class="card">
+        <summary>⚙️ Parámetros</summary>
+        <div class="inner">
+          <div class="grid2">
+            <div><label class="lbl" for="p-monto">Monto de referencia (COP)</label><input id="p-monto" data-key="monto" type="number" inputmode="decimal" step="any"></div>
+            <div><label class="lbl" for="p-com">Comisión de la empleada (%)</label><input id="p-com" data-key="com" type="number" inputmode="decimal" step="any"></div>
+            <div><label class="lbl" for="p-fee1">Fee al comprar USDT (%)</label><input id="p-fee1" data-key="fee1" type="number" inputmode="decimal" step="any"></div>
+            <div><label class="lbl" for="p-fee2">Fee al vender USDT (%)</label><input id="p-fee2" data-key="fee2" type="number" inputmode="decimal" step="any"></div>
+            <div><label class="lbl" for="p-ajcop">Ajuste COP por USDT (escenarios 2 y 3)</label><input id="p-ajcop" data-key="ajCop" type="number" inputmode="decimal" step="any"></div>
+            <div><label class="lbl" for="p-ajbs">Ajuste Bs por USDT (escenario 3)</label><input id="p-ajbs" data-key="ajBs" type="number" inputmode="decimal" step="any"></div>
+            <div><label class="lbl" for="p-dec">Decimales de la tasa</label><input id="p-dec" data-key="dec" type="number" inputmode="numeric" min="0" max="6" step="1"></div>
+          </div>
+          <p class="hint">La comisión de la empleada se descuenta de los COP antes de comprar USDT. No se suma ningún +0,02 a la tasa.</p>
+          
+        </div>
+      </details>
+    </div>
+  </div>
 
-                if (bcv.price != null) {
-                    state.priceBcv = bcv.price;
-                    guardarLocal('remesa_bcv', bcv.price);
-                    document.getElementById('priceBcv').textContent = formatNum(bcv.price, 2);
-                    document.getElementById('nickBcv').textContent = 'En vivo';
-                    document.getElementById('manualBcv').value = bcv.price;
-                }
+  <!-- ═══════ REMESAS (con clave) ═══════ -->
+  <div class="tab-panel" id="tab-remesas">
+    <div class="card" id="gate-remesas" hidden></div>
+    <div id="in-remesas" hidden>
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span> Resumen</div>
+        <dl class="kv" id="rs-sum"></dl>
+      </div>
+      <div class="row-between">
+        <h2>Mis remesas</h2>
+        <button type="button" class="btn primary" id="rs-new" aria-expanded="false" aria-controls="rs-form">Nueva remesa</button>
+      </div>
+      <form class="card" id="rs-form" hidden>
+        <div class="grid2">
+          <div><label class="lbl" for="f-fecha">Fecha de la remesa</label><input id="f-fecha" type="date" required></div>
+          <div><label class="lbl" for="f-cliente">Cliente o referencia</label><input id="f-cliente" type="text" maxlength="80" autocomplete="off"></div>
+          <div><label class="lbl" for="f-monto">Monto enviado (COP)</label><input id="f-monto" type="number" inputmode="decimal" step="any" min="0" required></div>
+          <div><label class="lbl" for="f-tasa">Tasa cotizada</label><input id="f-tasa" type="number" inputmode="decimal" step="any" min="0" required></div>
+          <div><label class="lbl" for="f-bs">Bs por USDT ese día</label><input id="f-bs" type="number" inputmode="decimal" step="any" min="0" required></div>
+          <div><label class="lbl" for="f-cop">COP por USDT ese día</label><input id="f-cop" type="number" inputmode="decimal" step="any" min="0" required></div>
+          <div><label class="lbl" for="f-com">Comisión empleada (%)</label><input id="f-com" type="number" inputmode="decimal" step="any" min="0"></div>
+          <div><label class="lbl" for="f-fee">Fee (% cada uno)</label><input id="f-fee" type="number" inputmode="decimal" step="any" min="0"></div>
+        </div>
+        <p class="hint">Los precios de ese día son tu colchón (Binance). Con ellos se calcula cuánto ibas a ganar.</p>
+        <div class="actions">
+          <button type="submit" class="btn primary">Guardar remesa</button>
+          <button type="button" class="btn" id="rs-cancel">Cancelar</button>
+        </div>
+      </form>
+      <div id="rs-list"></div>
+    </div>
+  </div>
+  <div class="footer">Remesa P2P v2 — App Web + Proxy<br>Precios en vivo vía Binance P2P · Dólar oficial BCV</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-                document.getElementById('statusDot').classList.remove('offline');
-                document.getElementById('statusText').textContent = 'En línea';
-                document.getElementById('lastUpdate').textContent = `Actualizado: ${new Date().toLocaleTimeString('es')}`;
+<script>
+/* CALC-START */
+function bsObtenidos(monto, comPct, fee1Pct, fee2Pct, cop, bs) {
+  return monto * (1 - comPct / 100) / cop * (1 - fee1Pct / 100) * bs * (1 - fee2Pct / 100);
+}
+function roundUp(x, d) { var f = Math.pow(10, d); return Math.ceil(x * f - 1e-9) / f; }
+function calcTasa(c) {
+  var bsO = bsObtenidos(c.monto, c.com, c.fee1, c.fee2, c.cop, c.bs);
+  var disp = bsO - c.objetivo * c.bs;
+  var ok = isFinite(disp) && disp > 0;
+  var exacta = ok ? c.monto / disp : null;
+  return { bsO: bsO, exacta: exacta, cotizar: ok ? roundUp(exacta, c.dec) : null };
+}
+function escenarios(c, tasa) {
+  var defs = [
+    { cop: c.cop, bs: c.bs },
+    { cop: c.cop + c.ajCop, bs: c.bs },
+    { cop: c.cop + c.ajCop, bs: c.bs + c.ajBs }
+  ];
+  return defs.map(function (d) {
+    var bsObt = bsObtenidos(c.monto, c.com, c.fee1, c.fee2, d.cop, d.bs);
+    var o = { cop: d.cop, bs: d.bs, bsObt: bsObt, bsCli: null, gBs: null, gUsdt: null, gCop: null };
+    if (tasa > 0) {
+      o.bsCli = c.monto / tasa;
+      o.gBs = bsObt - o.bsCli;
+      o.gUsdt = o.gBs / d.bs;
+      o.gCop = o.gUsdt * d.cop;
+    }
+    return o;
+  });
+}
+function gananciaA(c, esc, tasa) { return tasa > 0 ? (esc.bsObt - c.monto / tasa) / esc.bs : null; }
+function remesaCalc(r) {
+  var out = { bsCli: r.monto / r.tasa, esperado: null, real: null, dif: null, estado: 'pendiente', bsReales: null };
+  var bsO = bsObtenidos(r.monto, r.com, r.fee, r.fee, r.copDia, r.bsDia);
+  out.esperado = (bsO - out.bsCli) / r.bsDia;
+  var rt = r.retiro;
+  if (rt) {
+    var bsReal = null, divisor = r.bsDia;
+    if (rt.bsRecibidos > 0) { bsReal = rt.bsRecibidos; if (rt.bsReal > 0) divisor = rt.bsReal; }
+    else if (rt.copReal > 0 && rt.bsReal > 0) {
+      bsReal = bsObtenidos(r.monto, r.com, r.fee, r.fee, rt.copReal, rt.bsReal);
+      divisor = rt.bsReal;
+    }
+    if (bsReal != null) {
+      out.bsReales = bsReal;
+      out.real = (bsReal - out.bsCli) / divisor;
+      out.dif = out.real - out.esperado;
+      out.estado = out.real < 0 ? 'perdida' : (out.real >= out.esperado - 1e-9 ? 'igual' : 'menos');
+    }
+  }
+  return out;
+}
+/* CALC-END */
 
-                calcularTodo();
-            } catch (err) {
-                console.error(err);
-                document.getElementById('statusDot').classList.add('offline');
-                document.getElementById('statusText').textContent = 'Sin conexión';
-                errEl.textContent = `⚠️ No se pudieron obtener precios en vivo. Ingresa las tasas manualmente abajo.`;
-                errEl.style.display = 'block';
-            } finally {
-                btn.classList.remove('loading');
-            }
+(function () {
+  'use strict';
+
+  var DEFAULTS = { objetivo: 1.12, bs: 961, cop: 3309.95, bcv: 857.8876, ajCop: -30, ajBs: 5, com: 5, fee1: 0.1, fee2: 0.1, monto: 100000, dec: 2, comp: [3.86, 3.78, 3.82] };
+  var NUM_KEYS = ['objetivo', 'bs', 'cop', 'bcv', 'ajCop', 'ajBs', 'com', 'fee1', 'fee2', 'monto', 'dec'];
+  var LS_KEY = 'remesa-p2p-v3';
+  var PIN = { salt: 'df46b822d0760cda', hash: 'e15bf5dfc3bc048b526dc70b106416ff7ebe909e3a983b187e7247c99ded2895' };
+  var PREF = 'rp2p-';
+  var IDLE_MS = 10 * 60 * 1000;
+
+  var cfg = JSON.parse(JSON.stringify(DEFAULTS));
+  cfg.pin = null;
+  var pub = { tasa: null, bcv: null, dec: 2, ts: null };
+  var remesas = [];
+  var loaded = false;
+  var storeMode = 'local';
+  var priceTs = null;          // hora de los últimos precios en vivo
+  var canAdmin = true;
+  var unlocked = false;
+  var lastActive = Date.now();
+  var cfgDirty = false, saveTimer = null, queue = Promise.resolve();
+  var ui = { formOpen: false, editRetiro: null, confirmDel: null };
+  var mode = 'cop';
+  var lastSig = '';
+  var toastTimer = null;
+  var failCount = 0, lockUntil = 0;
+  var curTab = 'calc';
+
+  function $(id) { return document.getElementById(id); }
+  function isNum(v) { return typeof v === 'number' && isFinite(v); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function todayISO() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function fmtDate(iso) { if (!iso) return ''; var p = String(iso).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; }
+  function fmtStamp(ts) { var d = new Date(ts); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function sameDay(ts) { var a = new Date(ts), b = new Date(); return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  function fmt(n, d) {
+    if (!isNum(n)) return '—';
+    var neg = n < 0;
+    var p = Math.abs(n).toFixed(d).split('.');
+    p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return (neg ? '−' : '') + p.join(',');
+  }
+  function fmtSigned(n, d) { return isNum(n) ? (n > 0 ? '+' : '') + fmt(n, d) : '—'; }
+  function sgn(n) { return (n < 0 ? '−' : '+') + String(Math.abs(n)).replace('.', ','); }
+  function numOrNull(s) { var v = parseFloat(s); return isFinite(v) ? v : null; }
+  function tasaDigits() { return Math.max(2, cfg.dec); }
+  function lsGet(k, def) { try { var v = localStorage.getItem(PREF + k); return v == null ? def : v; } catch (e) { return def; } }
+  function lsSet(k, v) { try { localStorage.setItem(PREF + k, String(v)); } catch (e) { /* sin almacenamiento */ } }
+
+  function h(tag, props) {
+    var el = document.createElement(tag);
+    if (props) {
+      Object.keys(props).forEach(function (k) {
+        var v = props[k];
+        if (v == null || v === false) return;
+        if (k === 'class') el.className = v;
+        else if (k === 'text') el.textContent = v;
+        else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), v);
+        else if (v === true) el.setAttribute(k, '');
+        else el.setAttribute(k, v);
+      });
+    }
+    var add = function (c) {
+      if (c == null || c === false) return;
+      if (Array.isArray(c)) { c.forEach(add); return; }
+      el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    };
+    for (var i = 2; i < arguments.length; i++) add(arguments[i]);
+    return el;
+  }
+
+  function toast(msg, isErr) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (isErr ? ' err' : '');
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, isErr ? 5000 : 2600);
+  }
+
+
+  /* ───────── clave ───────── */
+  function randHex(n) {
+    var a = new Uint8Array(n);
+    crypto.getRandomValues(a);
+    return Array.prototype.map.call(a, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+  }
+  async function hashPin(pin, salt) {
+    var buf = new TextEncoder().encode(salt + ':' + pin);
+    var d = await crypto.subtle.digest('SHA-256', buf);
+    return Array.prototype.map.call(new Uint8Array(d), function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+  }
+  async function makePin(pin) { var salt = randHex(8); return { salt: salt, hash: await hashPin(pin, salt) }; }
+
+  function touch() { lastActive = Date.now(); }
+  function setLocked(v) {
+    unlocked = !v;
+    $('lock-btn').hidden = !unlocked;
+    ['calculos', 'remesas'].forEach(function (t) {
+      $('tb-' + t).textContent = (unlocked ? '🔓 ' : '🔒 ') + (t === 'calculos' ? 'Mis cálculos' : 'Remesas');
+    });
+    if (unlocked) { fillInputs(); renderCalculos(); renderRemesas(true); }
+    else { document.querySelectorAll('[data-key]').forEach(function (el) { el.value = ''; }); }
+    refreshGates();
+  }
+  function refreshGates() {
+    ['calculos', 'remesas'].forEach(function (t) {
+      var g = $('gate-' + t), inner = $('in-' + t);
+      inner.hidden = !unlocked;
+      g.hidden = unlocked;
+      if (!unlocked) renderGate(g);
+    });
+  }
+  function renderGate(box) {
+    box.textContent = '';
+    var wrap = h('div', { class: 'gate' });
+    if (!loaded) {
+      wrap.appendChild(h('div', { class: 'g-s', text: 'Cargando…' }));
+    } else if (false) {
+      wrap.appendChild(h('div', { class: 'g-ico', text: '🔒' }));
+      wrap.appendChild(h('div', { class: 'g-t', text: 'Sección privada' }));
+      wrap.appendChild(h('div', { class: 'g-s', text: 'Solo el dueño de la cuenta puede entrar aquí.' }));
+    } else if (false) {
+      var p1 = h('input', { type: 'password', autocomplete: 'new-password', 'aria-label': 'Clave nueva', placeholder: 'Clave nueva' });
+      var p2 = h('input', { type: 'password', autocomplete: 'new-password', 'aria-label': 'Repite la clave', placeholder: 'Repite la clave' });
+      var err = h('div', { class: 'err', role: 'alert' });
+      var go = async function () {
+        if (p1.value.length < 4) { err.textContent = 'Usa al menos 4 caracteres.'; return; }
+        if (p1.value !== p2.value) { err.textContent = 'Las dos claves no coinciden.'; return; }
+        try { cfg.pin = await makePin(p1.value); } catch (e) { err.textContent = 'Este navegador no permite crear la clave.'; return; }
+        scheduleSave(true); touch(); setLocked(false); toast('Clave creada');
+      };
+      p2.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(); });
+      wrap.appendChild(h('div', { class: 'g-ico', text: '🔐' }));
+      wrap.appendChild(h('div', { class: 'g-t', text: 'Crea tu clave' }));
+      wrap.appendChild(h('div', { class: 'g-s', text: 'Con ella solo tú entras a Mis cálculos y Remesas. Tus empleadas verán únicamente la Calculadora y la Imagen.' }));
+      wrap.appendChild(h('div', { class: 'stack' }, p1, p2, err, h('button', { type: 'button', class: 'btn primary', style: 'width:100%', text: 'Crear clave', onclick: go })));
+    } else {
+      var pin = h('input', { type: 'password', autocomplete: 'current-password', 'aria-label': 'Clave', placeholder: 'Clave' });
+      var er = h('div', { class: 'err', role: 'alert' });
+      var enter = async function () {
+        var wait = lockUntil - Date.now();
+        if (wait > 0) { er.textContent = 'Espera ' + Math.ceil(wait / 1000) + ' s para intentar otra vez.'; return; }
+        var ok = false;
+        try { ok = (await hashPin(pin.value, PIN.salt)) === PIN.hash; } catch (e) { er.textContent = 'Este navegador no permite verificar la clave.'; return; }
+        if (ok) { failCount = 0; touch(); setLocked(false); }
+        else {
+          failCount++;
+          if (failCount >= 3) lockUntil = Date.now() + 5000 * Math.pow(2, Math.min(failCount - 3, 6));
+          er.textContent = 'Clave incorrecta.'; pin.value = ''; pin.focus();
         }
+      };
+      pin.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') enter(); });
+      wrap.appendChild(h('div', { class: 'g-ico', text: '🔒' }));
+      wrap.appendChild(h('div', { class: 'g-t', text: 'Sección con clave' }));
+      wrap.appendChild(h('div', { class: 'g-s', text: 'Escribe tu clave para ver tus cálculos internos y tus remesas.' }));
+      wrap.appendChild(h('div', { class: 'stack' }, pin, er, h('button', { type: 'button', class: 'btn primary', style: 'width:100%', text: 'Entrar', onclick: enter })));
+    }
+    box.appendChild(wrap);
+  }
+  $('lock-btn').addEventListener('click', function () { setLocked(true); if (curTab === 'calculos' || curTab === 'remesas') showTab('calc'); });
+  setInterval(function () { if (unlocked && Date.now() - lastActive > IDLE_MS) { setLocked(true); if (curTab === 'calculos' || curTab === 'remesas') showTab('calc'); toast('Se bloqueó por inactividad'); } }, 20000);
+  ['click', 'keydown', 'input', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, touch, { passive: true }); });
 
-        // ═══════════════════════════════════════
-        // MANUAL INPUT
-        // ═══════════════════════════════════════
-        function onManualChange() {
-            const ves = parseFloat(document.getElementById('manualVes').value);
-            const cop = parseFloat(document.getElementById('manualCop').value);
-            const bcv = parseFloat(document.getElementById('manualBcv').value);
+  /* ───────── almacenamiento (solo en este dispositivo) ───────── */
+  function cfgBody() {
+    var o = { v: 3, comp: cfg.comp.slice(), ts: priceTs };
+    NUM_KEYS.forEach(function (k) { o[k] = cfg[k]; });
+    return o;
+  }
+  function applyCfg(doc) {
+    if (!doc) return;
+    NUM_KEYS.forEach(function (k) { if (isNum(doc[k])) cfg[k] = doc[k]; });
+    if (Array.isArray(doc.comp)) { for (var i = 0; i < 3; i++) { if (isNum(doc.comp[i])) cfg.comp[i] = doc.comp[i]; } }
+    if (isNum(doc.ts)) priceTs = doc.ts;
+  }
+  function stripId(r) { var o = {}; Object.keys(r).forEach(function (k) { if (k !== 'id') o[k] = r[k]; }); return o; }
+  function sortRemesas() {
+    remesas.sort(function (a, b) { return String(b.fecha || '').localeCompare(String(a.fecha || '')) || (b.creado || 0) - (a.creado || 0); });
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify({ cfg: cfgBody(), remesas: remesas })); } catch (e) { /* sin almacenamiento */ }
+  }
+  function loadLocal() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && d.cfg) applyCfg(d.cfg);
+        if (d && Array.isArray(d.remesas)) remesas = d.remesas;
+        sortRemesas();
+      }
+    } catch (e) { /* sin datos previos */ }
+  }
+  function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveLocal, 400); }
+  function persistRemesa(id, body) {
+    var idx = remesas.findIndex(function (x) { return x.id === id; });
+    var item = Object.assign({ id: id }, body);
+    if (idx >= 0) remesas[idx] = item; else remesas.push(item);
+    sortRemesas(); saveLocal(); renderRemesas(true);
+  }
+  function removeRemesa(id) {
+    remesas = remesas.filter(function (x) { return x.id !== id; });
+    saveLocal(); renderRemesas(true);
+  }
 
-            if (!isNaN(ves) && ves > 0) {
-                state.priceVes = ves;
-                document.getElementById('priceVes').textContent = formatNum(ves, 2);
-                document.getElementById('nickVes').textContent = 'Manual';
-            }
-            if (!isNaN(cop) && cop > 0) {
-                state.priceCop = cop;
-                document.getElementById('priceCop').textContent = formatNum(cop, 0);
-                document.getElementById('nickCop').textContent = 'Manual';
-            }
-            if (!isNaN(bcv) && bcv > 0 && bcv !== state.priceBcv) {
-                state.priceBcv = bcv;
-                guardarLocal('remesa_bcv', bcv);
-                document.getElementById('priceBcv').textContent = formatNum(bcv, 2);
-                document.getElementById('nickBcv').textContent = 'Manual';
-            }
+  /* La tasa que ven clientes y empleadas se calcula con los precios en vivo */
+  function syncPub() {
+    var t = priceTs ? calcTasa(cfg).cotizar : null;
+    pub = { tasa: t, bcv: priceTs ? cfg.bcv : null, dec: tasaDigits(), ts: priceTs };
+  }
+  function setNet(ok) {
+    $('statusDot').className = 'status-dot' + (ok ? '' : ' offline');
+    $('statusText').textContent = ok ? 'En línea' : 'Sin conexión';
+  }
+  async function fetchPrices() {
+    var btn = $('btnUpdateHeader'), err = $('errorMsg');
+    btn.classList.add('loading'); err.style.display = 'none';
+    try {
+      var resp = await fetch('/api/prices');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      var data = await resp.json();
+      if (!data.ok) throw new Error(data.error || 'Proxy error');
+      var ves = data.ves || {}, cop = data.cop || {}, bcv = data.bcv || {};
+      if (bcv.price != null) cfg.bcv = bcv.price;
+      if (ves.price != null && cop.price != null) {
+        cfg.bs = ves.price; cfg.cop = cop.price; priceTs = Date.now();
+        setNet(true);
+      } else {
+        setNet(false);
+        err.textContent = '⚠️ No llegaron todos los precios en vivo.' + (priceTs ? ' Se usan los últimos guardados.' : '');
+        err.style.display = 'block';
+      }
+      $('live-note').textContent = 'Se toman de Binance P2P (Mercantil y Bancolombia, vendedores no verificados) al abrir la app y cada 5 minutos.' + (priceTs ? ' Última actualización: ' + fmtStamp(priceTs) + '.' : '');
+      saveLocal();
+    } catch (e) {
+      setNet(false);
+      err.textContent = '⚠️ No se pudieron obtener los precios en vivo.' + (priceTs ? ' Se usan los últimos guardados.' : '');
+      err.style.display = 'block';
+    } finally {
+      btn.classList.remove('loading');
+      syncPub(); fillInputs(); renderPublic(); renderCalculos(); renderRemesas();
+    }
+  }
+  $('btnUpdateHeader').addEventListener('click', fetchPrices);
 
-            calcularTodo();
-        }
+  function initStore() {
+    loadLocal(); loaded = true;
+    syncPub(); refreshGates(); renderPublic();
+    fetchPrices();
+    setInterval(function () { if (!document.hidden) fetchPrices(); }, 300000);
+  }
 
-        // ═══════════════════════════════════════
-        // CÁLCULO PRINCIPAL
-        // ═══════════════════════════════════════
-        function calcularTodo() {
-            const f3 = state.priceVes; // VES/USDT
-            const b7 = state.priceCop; // COP/USDT
+  /* ───────── pestañas ───────── */
+  function showTab(name) {
+    curTab = name;
+    ['calc', 'img', 'calculos', 'remesas'].forEach(function (t) {
+      var on = t === name;
+      $('tb-' + t).classList.toggle('active', on);
+      $('tb-' + t).setAttribute('aria-selected', on ? 'true' : 'false');
+      $('tab-' + t).classList.toggle('active', on);
+    });
+    if (name === 'img') renderImg();
+    if (name === 'calculos' || name === 'remesas') refreshGates();
+  }
+  document.querySelectorAll('.tabs [data-tab]').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
 
-            if (!f3 || !b7) {
-                actualizarCalculadora();
-                return;
-            }
+  /* ───────── inputs de configuración ───────── */
+  function fillInputs() {
+    if (!unlocked) return;
+    document.querySelectorAll('[data-key]').forEach(function (el) { if (document.activeElement !== el) el.value = cfg[el.dataset.key]; });
+    document.querySelectorAll('[data-comp]').forEach(function (el) { if (document.activeElement !== el) el.value = cfg.comp[+el.dataset.comp]; });
+  }
+  function onCfgChange() { syncPub(); renderPublic(); renderCalculos(); renderRemesas(); scheduleSave(); }
+  document.querySelectorAll('[data-key]').forEach(function (el) {
+    el.addEventListener('input', function () {
+      if (!unlocked) return;
+      var v = parseFloat(el.value);
+      if (!isFinite(v)) return;
+      var k = el.dataset.key;
+      if (k === 'dec') v = Math.max(0, Math.min(6, Math.round(v)));
+      cfg[k] = v;
+      onCfgChange();
+    });
+  });
+  document.querySelectorAll('[data-comp]').forEach(function (el) {
+    el.addEventListener('input', function () {
+      if (!unlocked) return;
+      var v = parseFloat(el.value);
+      if (!isFinite(v)) return;
+      cfg.comp[+el.dataset.comp] = v;
+      onCfgChange();
+    });
+  });
 
-            // Un campo vacío usa el valor por defecto; un 0 escrito se respeta.
-            const comPct = leerNum('paramCom', 5) / 100;
-            const margen = leerNum('paramMargen', 100);
-            const fee1Pct = leerNum('paramFee1', 0.1) / 100;
-            const fee2Pct = leerNum('paramFee2', 0.1) / 100;
-            const objetivo = leerNum('paramObj', 1.20);
-            const extra = leerNum('paramExtra', 0.02);
+  /* ───────── calculadora pública ───────── */
+  function pubDigits() { return Math.max(2, pub.dec || 2); }
+  function renderPublic() {
+    var tasa = pub.tasa, d = pubDigits();
+    $('rr-val').textContent = tasa ? fmt(tasa, d) : '—';
+    $('rr-sub').textContent = !tasa ? 'Esperando los precios en vivo…'
+      : 'Tasa del día · ' + (pub.ts ? (sameDay(pub.ts) ? 'actualizada hoy ' : 'de otro día: ') + fmtStamp(pub.ts) : 'sin fecha');
+    var amt = parseFloat($('calc-monto').value), bcv = pub.bcv;
+    var res = null;
+    if (tasa && isFinite(amt) && amt >= 0) res = mode === 'cop' ? amt / tasa : Math.ceil(amt * tasa - 1e-9);
+    $('res-val').textContent = res == null ? '—' : fmt(res, mode === 'cop' ? 2 : 0);
+    $('bk-tasa').textContent = tasa ? fmt(tasa, d) : '—';
+    $('bk-final').textContent = res == null ? '—' : fmt(res, mode === 'cop' ? 2 : 0) + (mode === 'cop' ? ' Bs' : ' COP');
+    var bsVal = res == null ? null : (mode === 'cop' ? res : amt);
+    var usd = (bcv && bsVal != null) ? bsVal / bcv : null;
+    $('bk-usd').textContent = usd == null ? '—' : '$' + fmt(usd, 2);
+    $('res-usd').textContent = usd == null ? '' : '≈ $' + fmt(usd, 2) + ' USD (BCV)';
+    renderMensaje();
+    if (curTab === 'img') renderImg();
+  }
+  function setModo(m) {
+    mode = m;
+    $('modo-cop').classList.toggle('active', m === 'cop');
+    $('modo-bs').classList.toggle('active', m === 'bs');
+    $('calc-label').textContent = m === 'cop' ? 'El cliente envía (COP)' : 'El cliente quiere recibir (Bs)';
+    $('calc-suffix').textContent = m === 'cop' ? 'COP' : 'Bs';
+    $('res-label').textContent = m === 'cop' ? 'Entregar al cliente' : 'El cliente debe enviar';
+    $('res-sub').textContent = m === 'cop' ? 'bolívares (Bs)' : 'pesos colombianos (COP)';
+    $('bk-formula').textContent = m === 'cop' ? 'COP ÷ Tasa = Bs' : 'Bs × Tasa = COP';
+    $('calc-monto').value = m === 'cop' ? 100000 : 25000;
+    renderPublic();
+  }
+  $('modo-cop').addEventListener('click', function () { setModo('cop'); });
+  $('modo-bs').addEventListener('click', function () { setModo('bs'); });
+  $('calc-monto').addEventListener('input', renderPublic);
 
-            const b6 = b7 + margen; // Tasa de venta COP
+  /* mensaje de WhatsApp (igual que en tu app) */
+  function leerMontos() {
+    return $('wa-montos').value.split(/[,;\s]+/).map(function (t) { return parseInt(t.replace(/\D/g, ''), 10); }).filter(function (n) { return n > 0; });
+  }
+  function construirMensaje() {
+    var tasa = pub.tasa;
+    if (!tasa) return null;
+    var d = pubDigits(), bcv = pub.bcv, conUsd = $('wa-usd').checked && bcv;
+    var lineas = ['💱 *Tasa del día: ' + fmt(tasa, d) + '*', '🇨🇴 COP ➡️ Bs 🇻🇪', ''];
+    leerMontos().forEach(function (cop) {
+      var bs = cop / tasa;
+      var l = '• ' + fmt(cop, 0) + ' COP ➡️ *' + fmt(bs, 2) + ' Bs*';
+      if (conUsd) l += ' (≈ $' + fmt(bs / bcv, 2) + ')';
+      lineas.push(l);
+    });
+    if (conUsd) lineas.push('', '💵 Dólares calculados a tasa BCV: ' + fmt(bcv, 2) + ' Bs');
+    return lineas.join('\n');
+  }
+  function renderMensaje() {
+    var msg = construirMensaje();
+    $('wa-preview').textContent = msg || 'Esperando la tasa del día…';
+    $('wa-link').href = 'https://wa.me/?text=' + encodeURIComponent(msg || '');
+  }
+  $('wa-montos').value = lsGet('montos', $('wa-montos').value);
+  $('wa-usd').checked = lsGet('usd', '1') === '1';
+  $('wa-montos').addEventListener('input', function () { lsSet('montos', $('wa-montos').value); renderMensaje(); });
+  $('wa-usd').addEventListener('change', function () { lsSet('usd', $('wa-usd').checked ? '1' : '0'); renderMensaje(); });
+  $('wa-copy').addEventListener('click', function () {
+    var msg = construirMensaje(), aviso = $('wa-msg');
+    if (!msg) { aviso.textContent = '⚠️ Aún no hay tasa del día.'; return; }
+    var ok = function () { aviso.textContent = '✅ Mensaje copiado. Pégalo en WhatsApp.'; };
+    var fail = function () {
+      var r = document.createRange(); r.selectNodeContents($('wa-preview'));
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      aviso.textContent = '⚠️ Selecciona el texto de arriba y cópialo, o usa "Enviar por WhatsApp".';
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(msg).then(ok, fail); else fail();
+    } catch (e) { fail(); }
+  });
 
-            // ─── Calcular tasa del día (COP/VES) ───
-            const comFactor = 1 - comPct;
-            const fee1Factor = 1 - fee1Pct;
-            const fee2Factor = 1 - fee2Pct;
-            const gananciaBs = objetivo * f3;
+  /* ───────── imagen con la tasa ───────── */
+  var imgMode = 'template', imgFileData = null, imgRateTouched = false, imgRenderId = 0;
+  var imgX = parseFloat(lsGet('imx', 81)), imgY = parseFloat(lsGet('imy', 51)), imgS = parseFloat(lsGet('ims', 100));
+  if (!isFinite(imgX)) imgX = 81; if (!isFinite(imgY)) imgY = 51; if (!isFinite(imgS)) imgS = 100;
+  $('im-x').value = imgX; $('im-y').value = imgY; $('im-s').value = imgS;
 
-            const deduccionesFactor = comFactor * fee1Factor * fee2Factor;
+  function setImgMode(m) {
+    imgMode = m;
+    $('im-tpl').classList.toggle('active', m === 'template');
+    $('im-up').classList.toggle('active', m === 'upload');
+    $('im-upbox').hidden = m !== 'upload';
+    renderImg();
+  }
+  $('im-tpl').addEventListener('click', function () { setImgMode('template'); });
+  $('im-up').addEventListener('click', function () { setImgMode('upload'); });
+  $('im-file').addEventListener('change', function (e) {
+    var f = e.target.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () { imgFileData = r.result; renderImg(); };
+    r.readAsDataURL(f);
+  });
+  $('im-rate').addEventListener('input', function () { imgRateTouched = true; renderImg(); });
+  function onPos() {
+    var x = numOrNull($('im-x').value), y = numOrNull($('im-y').value), s = numOrNull($('im-s').value);
+    imgX = Math.min(100, Math.max(0, x == null ? 81 : x));
+    imgY = Math.min(100, Math.max(0, y == null ? 51 : y));
+    imgS = Math.min(400, Math.max(40, s == null ? 100 : s));
+    lsSet('imx', imgX); lsSet('imy', imgY); lsSet('ims', imgS);
+    renderImg();
+  }
+  ['im-x', 'im-y', 'im-s'].forEach(function (id) { $(id).addEventListener('input', onPos); });
+  $('im-out').addEventListener('click', function (e) {
+    var r = e.currentTarget.getBoundingClientRect();
+    $('im-x').value = Math.min(100, Math.max(0, Math.round((e.clientX - r.left) / r.width * 100)));
+    $('im-y').value = Math.min(100, Math.max(0, Math.round((e.clientY - r.top) / r.height * 100)));
+    onPos();
+  });
+  function loadImg(src) {
+    return new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = src; });
+  }
+  async function renderImg() {
+    var mine = ++imgRenderId;
+    if (!imgRateTouched) { var pr = $('im-rate'); if (document.activeElement !== pr) pr.value = pub.tasa ? pub.tasa.toFixed(pubDigits()) : ''; }
+    var cv = $('im-cv'), W = 1080, H = 1080;
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d');
+    var v = parseFloat($('im-rate').value);
+    var tasa = isFinite(v) && v > 0 ? v : pub.tasa;
+    var im = await loadImg(imgMode === 'upload' && imgFileData ? imgFileData : 'imagenes/plantilla-remesa.jpg');
+    try { await document.fonts.load('800 ' + imgS + 'px Inter'); } catch (e) { /* usa la fuente de respaldo */ }
+    if (mine !== imgRenderId) return;
+    if (im) {
+      var sc = Math.max(W / im.width, H / im.height), dw = im.width * sc, dh = im.height * sc;
+      ctx.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    } else {
+      var g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, '#0a0a14'); g.addColorStop(0.5, '#101c3d'); g.addColorStop(1, '#083b30');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 18;
+    ctx.font = '800 ' + imgS + 'px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(tasa ? tasa.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—', W * imgX / 100, H * imgY / 100);
+    ctx.shadowBlur = 0;
+    $('im-out').src = cv.toDataURL('image/jpeg', 0.92);
+  }
+  $('im-dl').addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.download = 'tasa-remesa-cop.jpg';
+    a.href = $('im-cv').toDataURL('image/jpeg', 0.92);
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  if (navigator.share && navigator.canShare) $('im-share').style.display = '';
+  $('im-share').addEventListener('click', function () {
+    $('im-cv').toBlob(async function (b) {
+      try { await navigator.share({ files: [new File([b], 'tasa-remesa-cop.jpg', { type: 'image/jpeg' })] }); }
+      catch (e) { if (!e || e.name !== 'AbortError') $('im-msg').textContent = '⚠️ No se pudo compartir; usa "Descargar JPG".'; }
+    }, 'image/jpeg', 0.92);
+  });
 
-            // Para obtener la tasa final que incluya ganancia, calculamos
-            // cuántas COP por VES entregamos:
-            const vesPerCOP = deduccionesFactor / b6 * f3;
-            const vesSinGanancia = REF_COP * vesPerCOP;
-            const vesEntrega = vesSinGanancia - gananciaBs;
-            const j1 = REF_COP / vesEntrega;
+  /* ───────── mis cálculos (interno) ───────── */
+  function renderCalculos() {
+    if (!unlocked) return;
+    var t = calcTasa(cfg), tasa = t.cotizar, d = tasaDigits();
+    $('c-monto-lbl').textContent = fmt(cfg.monto, 0) + ' COP';
+    $('c-exacta').textContent = t.exacta == null ? '—' : fmt(t.exacta, 4);
+    $('c-cotizar').textContent = tasa == null ? '—' : fmt(tasa, d);
+    $('c-bscli').textContent = tasa == null ? '—' : fmt(cfg.monto / tasa, 2) + ' Bs';
+    $('c-emp').textContent = fmt(cfg.monto * cfg.com / 100, 0) + ' COP';
+    $('c-hint').textContent = tasa == null
+      ? 'Con estos precios no alcanzan los Bs para esa ganancia. Baja la ganancia que quieres o revisa los precios.'
+      : 'La tasa se redondea hacia arriba a ' + cfg.dec + ' decimales. Con más decimales te acercas más a la ganancia exacta.';
+    $('th2').textContent = 'COP ' + sgn(cfg.ajCop);
+    $('th3').textContent = 'COP ' + sgn(cfg.ajCop) + ' · Bs ' + sgn(cfg.ajBs);
+    var esc = escenarios(cfg, tasa);
+    for (var i = 0; i < 3; i++) {
+      var e = esc[i], n = i + 1;
+      $('e' + n + '-cop').textContent = fmt(e.cop, 2);
+      $('e' + n + '-bs').textContent = fmt(e.bs, 2);
+      $('e' + n + '-bsobt').textContent = fmt(e.bsObt, 1);
+      $('e' + n + '-bscli').textContent = fmt(e.bsCli, 1);
+      $('e' + n + '-gbs').textContent = fmt(e.gBs, 1);
+      $('e' + n + '-gusdt').textContent = fmt(e.gUsdt, 3);
+      $('e' + n + '-gcop').textContent = fmt(e.gCop, 0);
+    }
+    for (var r = 0; r < 3; r++) {
+      for (var j = 0; j < 3; j++) {
+        var g = gananciaA(cfg, esc[j], cfg.comp[r]);
+        var cell = $('cp' + r + '-' + (j + 1));
+        cell.textContent = fmt(g, 3);
+        cell.className = isNum(g) && g < 0 ? 'neg' : '';
+      }
+    }
+  }
 
-            const profitCard = document.getElementById('profitCard');
-            document.getElementById('profitObj').textContent = objetivo.toFixed(2);
-            document.getElementById('rdVes').textContent = formatNum(f3, 2);
-            document.getElementById('rdCop').textContent = formatNum(b7, 0);
-            document.getElementById('rdVenta').textContent = formatNum(b6, 0);
-            document.getElementById('rateClienteSub').textContent = `Tasa del día + ${formatNum(extra, 2)}`;
+  /* ───────── remesas (interno) ───────── */
+  function estadoPill(estado) {
+    var m = { pendiente: ['pending', 'Pendiente'], igual: ['good', 'Ganó igual o más'], menos: ['mid', 'Ganó menos'], perdida: ['loss', 'Pérdida'] }[estado];
+    return h('span', { class: 'pill ' + m[0], text: m[1] });
+  }
+  function kvRow(label, value, cls) { return h('div', null, h('dt', { text: label }), h('dd', { class: cls || null, text: value })); }
+  function retiroEditor(r) {
+    var rt = r.retiro || {};
+    var val = function (v) { return v == null ? '' : String(v); };
+    return h('div', { class: 'editor' },
+      h('div', { class: 'grid2' },
+        h('div', null, h('label', { class: 'lbl', for: 're-fecha', text: 'Fecha del retiro' }), h('input', { id: 're-fecha', type: 'date', value: rt.fecha || todayISO() })),
+        h('div', null, h('label', { class: 'lbl', for: 're-cop', text: 'COP por USDT real de compra' }), h('input', { id: 're-cop', type: 'number', inputmode: 'decimal', step: 'any', value: val(rt.copReal) })),
+        h('div', null, h('label', { class: 'lbl', for: 're-bs', text: 'Bs por USDT real de venta' }), h('input', { id: 're-bs', type: 'number', inputmode: 'decimal', step: 'any', value: val(rt.bsReal) })),
+        h('div', null, h('label', { class: 'lbl', for: 're-bsrec', text: 'Bs reales recibidos (opcional)' }), h('input', { id: 're-bsrec', type: 'number', inputmode: 'decimal', step: 'any', value: val(rt.bsRecibidos) }))
+      ),
+      h('p', { class: 'hint', text: 'Si escribes los Bs reales recibidos, se usan en lugar del cálculo con los precios.' }),
+      h('div', { class: 'actions' },
+        h('button', { type: 'button', class: 'btn primary', text: 'Guardar retiro', onclick: function () { saveRetiro(r.id); } }),
+        h('button', { type: 'button', class: 'btn', text: 'Cancelar', onclick: function () { ui.editRetiro = null; renderRemesas(true); } }),
+        r.retiro ? h('button', { type: 'button', class: 'btn danger', text: 'Quitar retiro', onclick: function () { quitarRetiro(r.id); } }) : null
+      )
+    );
+  }
+  function remesaCard(r, example) {
+    var c = remesaCalc(r);
+    var rows = [
+      kvRow('Monto', fmt(r.monto, 0) + ' COP'),
+      kvRow('Tasa cotizada', String(r.tasa).replace('.', ',')),
+      kvRow('Bs al cliente', fmt(c.bsCli, 2)),
+      kvRow('Ganancia esperada', fmt(c.esperado, 3) + ' USDT')
+    ];
+    if (c.real != null) {
+      rows.push(kvRow('Ganancia real', fmt(c.real, 3) + ' USDT', c.real < 0 ? 'neg' : null));
+      rows.push(kvRow('Diferencia', fmtSigned(c.dif, 3) + ' USDT', c.dif < -1e-9 ? 'neg' : 'pos'));
+    }
+    var noteTxt = 'Ese día: ' + fmt(r.bsDia, 2) + ' Bs y ' + fmt(r.copDia, 2) + ' COP por USDT.';
+    if (r.retiro && c.real != null) {
+      noteTxt += ' Retiro ' + fmtDate(r.retiro.fecha) + (r.retiro.bsRecibidos > 0 ? ': ' + fmt(r.retiro.bsRecibidos, 2) + ' Bs recibidos.'
+        : ': compra a ' + fmt(r.retiro.copReal, 2) + ' COP, venta a ' + fmt(r.retiro.bsReal, 2) + ' Bs.');
+    }
+    var actions = null;
+    if (!example) {
+      var confirming = ui.confirmDel === r.id;
+      actions = h('div', { class: 'actions' },
+        h('button', { type: 'button', class: 'btn', text: r.retiro ? 'Editar retiro' : 'Registrar retiro',
+          onclick: function () { ui.editRetiro = ui.editRetiro === r.id ? null : r.id; ui.confirmDel = null; renderRemesas(true); } }),
+        h('button', { type: 'button', class: 'btn danger', text: confirming ? 'Confirmar: eliminar' : 'Eliminar',
+          onclick: function () {
+            if (ui.confirmDel === r.id) { ui.confirmDel = null; removeRemesa(r.id); }
+            else { ui.confirmDel = r.id; renderRemesas(true); }
+          } }),
+        confirming ? h('button', { type: 'button', class: 'btn', text: 'No eliminar', onclick: function () { ui.confirmDel = null; renderRemesas(true); } }) : null
+      );
+    }
+    return h('article', { class: 'remesa' + (example ? ' example' : '') },
+      h('div', { class: 'remesa-head' },
+        h('div', null,
+          example ? h('div', { class: 'tag-ex', text: 'Ejemplo, no se guarda' }) : null,
+          h('div', { class: 'remesa-name', text: r.cliente || 'Sin nombre' }),
+          h('div', { class: 'remesa-date', text: fmtDate(r.fecha) })),
+        estadoPill(c.estado)),
+      h('dl', { class: 'kv' }, rows),
+      h('div', { class: 'note', text: noteTxt }),
+      actions,
+      !example && ui.editRetiro === r.id ? retiroEditor(r) : null
+    );
+  }
+  function renderRemesas(force) {
+    if (!unlocked) return;
+    var tasa = calcTasa(cfg).cotizar;
+    var sig = JSON.stringify([remesas, ui, remesas.length ? 0 : [cfg.bs, cfg.cop, cfg.com, cfg.fee1, tasa], loaded, storeMode]);
+    if (!force && sig === lastSig) return;
+    lastSig = sig;
+    var reg = remesas.length, pend = 0, espRet = 0, realRet = 0, espPend = 0;
+    remesas.forEach(function (r) {
+      var c = remesaCalc(r);
+      if (c.real == null) { pend++; espPend += c.esperado; } else { espRet += c.esperado; realRet += c.real; }
+    });
+    var dif = realRet - espRet, sum = $('rs-sum');
+    sum.textContent = '';
+    sum.appendChild(kvRow('Remesas registradas', String(reg)));
+    sum.appendChild(kvRow('Pendientes de retiro', String(pend)));
+    sum.appendChild(kvRow('Esperado en las retiradas', fmt(espRet, 3) + ' USDT'));
+    sum.appendChild(kvRow('Real en las retiradas', fmt(realRet, 3) + ' USDT', realRet < 0 ? 'neg' : null));
+    sum.appendChild(kvRow('Diferencia real − esperado', fmtSigned(dif, 3) + ' USDT', dif < -1e-9 ? 'neg' : (dif > 1e-9 ? 'pos' : null)));
+    sum.appendChild(kvRow('Esperado en las pendientes', fmt(espPend, 3) + ' USDT'));
+    var list = $('rs-list');
+    list.textContent = '';
+    if (!reg) {
+      list.appendChild(h('div', null,
+        h('p', { class: 'empty-t', text: loaded ? 'Todavía no registraste remesas.' : 'Cargando tus remesas…' }),
+        h('p', { class: 'hint', text: 'Registra cada remesa el día que la haces. Cuando retires, agrega los precios reales y verás si ganaste o perdiste frente a lo esperado.' })
+      ));
+      if (loaded && tasa != null) {
+        list.appendChild(remesaCard({
+          id: 'ejemplo', fecha: todayISO(), cliente: 'Cliente de ejemplo', monto: cfg.monto, tasa: tasa,
+          bsDia: cfg.bs, copDia: cfg.cop, com: cfg.com, fee: cfg.fee1,
+          retiro: { fecha: todayISO(), copReal: cfg.cop + 20, bsReal: cfg.bs - 3, bsRecibidos: null }
+        }, true));
+      }
+    } else {
+      remesas.forEach(function (r) { list.appendChild(remesaCard(r, false)); });
+    }
+  }
+  function saveRetiro(id) {
+    var r = remesas.find(function (x) { return x.id === id; });
+    if (!r) return;
+    var cop = numOrNull($('re-cop').value), bs = numOrNull($('re-bs').value), rec = numOrNull($('re-bsrec').value);
+    if (!(rec > 0) && !(cop > 0 && bs > 0)) { toast('Escribe los precios reales de compra y venta, o los Bs recibidos.', true); return; }
+    var body = stripId(r);
+    body.retiro = { fecha: $('re-fecha').value || todayISO(), copReal: cop, bsReal: bs, bsRecibidos: rec };
+    ui.editRetiro = null;
+    persistRemesa(id, body);
+    toast('Retiro guardado');
+  }
+  function quitarRetiro(id) {
+    var r = remesas.find(function (x) { return x.id === id; });
+    if (!r) return;
+    var body = stripId(r); body.retiro = null;
+    ui.editRetiro = null;
+    persistRemesa(id, body);
+  }
+  var form = $('rs-form');
+  function openForm(open) {
+    ui.formOpen = open;
+    form.hidden = !open;
+    $('rs-new').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+      var tasa = calcTasa(cfg).cotizar;
+      $('f-fecha').value = todayISO();
+      $('f-cliente').value = '';
+      $('f-monto').value = cfg.monto;
+      $('f-tasa').value = tasa == null ? '' : tasa;
+      $('f-bs').value = cfg.bs;
+      $('f-cop').value = cfg.cop;
+      $('f-com').value = cfg.com;
+      $('f-fee').value = cfg.fee1;
+      $('f-cliente').focus();
+    }
+  }
+  $('rs-new').addEventListener('click', function () { openForm(!ui.formOpen); });
+  $('rs-cancel').addEventListener('click', function () { openForm(false); });
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var monto = numOrNull($('f-monto').value), tasa = numOrNull($('f-tasa').value),
+        bs = numOrNull($('f-bs').value), cop = numOrNull($('f-cop').value);
+    if (!(monto > 0 && tasa > 0 && bs > 0 && cop > 0)) { toast('Completa monto, tasa y los dos precios con números mayores que cero.', true); return; }
+    var com = numOrNull($('f-com').value), fee = numOrNull($('f-fee').value);
+    var id = 'r_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    persistRemesa(id, {
+      fecha: $('f-fecha').value || todayISO(), cliente: $('f-cliente').value.trim(), monto: monto, tasa: tasa,
+      bsDia: bs, copDia: cop, com: com == null ? 0 : com, fee: fee == null ? 0 : fee, retiro: null, creado: Date.now()
+    });
+    openForm(false);
+    toast('Remesa guardada');
+  });
 
-            // Si con estos parámetros no queda nada para el cliente, la tasa
-            // saldría negativa o infinita: no se muestra ni se usa.
-            if (!(vesEntrega > 0) || !isFinite(j1)) {
-                state.tasaDia = null;
-                state.tasaCliente = null;
-                ['rateJ1Display', 'rateInverse', 'rateCliente']
-                    .forEach(id => document.getElementById(id).textContent = '—');
-                profitCard.classList.add('negative');
-                document.getElementById('profitValue').textContent = '⚠️ Pérdida';
-                actualizarCalculadora();
-                return;
-            }
-
-            // Tasa para el cliente: tasa del día + extra, redondeada hacia
-            // arriba a 2 decimales (el 1e-9 evita errores de coma flotante).
-            state.tasaDia = j1;
-            state.tasaCliente = Math.ceil((j1 + extra) * 100 - 1e-9) / 100;
-
-            // ─── TASA DEL DÍA card ───
-            document.getElementById('rateJ1Display').textContent = formatNum(j1, 4);
-            document.getElementById('rateInverse').textContent = formatNum(1 / j1, 6);
-
-            // ─── TASA PARA EL CLIENTE card ───
-            document.getElementById('rateCliente').textContent = formatNum(state.tasaCliente, 2);
-
-            // Ganancia
-            document.getElementById('profitValue').textContent = `$${objetivo.toFixed(2)}`;
-            profitCard.classList.remove('negative');
-
-            // La imagen usa la tasa del cliente mientras no se edite a mano
-            if (!imgRateTouched) {
-                document.getElementById('imgRate').value = state.tasaCliente.toFixed(2);
-                if (document.getElementById('tabImg').classList.contains('active')) renderImg();
-            }
-
-            actualizarCalculadora();
-        }
-
-        // ═══════════════════════════════════════
-        // CALCULADORA (COP → Bs  y  Bs → COP)
-        // ═══════════════════════════════════════
-        let modoCalc = 'cop';
-
-        function setModoCalc(modo) {
-            // Al cambiar de sentido se pasa el resultado actual como nuevo monto
-            const tasa = state.tasaCliente;
-            const monto = parseFloat(document.getElementById('calcMonto').value);
-            if (modo !== modoCalc && tasa && monto > 0) {
-                document.getElementById('calcMonto').value = modo === 'bs'
-                    ? (monto / tasa).toFixed(2)
-                    : Math.round(monto * tasa);
-            }
-            modoCalc = modo;
-            document.getElementById('modoCopBs').classList.toggle('active', modo === 'cop');
-            document.getElementById('modoBsCop').classList.toggle('active', modo === 'bs');
-            document.getElementById('calcLabel').textContent = modo === 'cop'
-                ? 'El cliente envía (COP)' : 'Deben llegar (Bs)';
-            document.getElementById('calcSuffix').textContent = modo === 'cop' ? 'COP' : 'Bs';
-            document.getElementById('resultLabel').textContent = modo === 'cop'
-                ? 'Entregar al cliente' : 'El cliente debe enviar';
-            document.getElementById('resultSub').textContent = modo === 'cop' ? 'bolívares (Bs)' : 'pesos (COP)';
-            document.getElementById('bkFormula').textContent = modo === 'cop'
-                ? 'COP ÷ Tasa = Bs' : 'Bs × Tasa = COP';
-            actualizarCalculadora();
-        }
-
-        function actualizarCalculadora() {
-            const tasa = state.tasaCliente;
-            const bcv = state.priceBcv;
-            const monto = parseFloat(document.getElementById('calcMonto').value);
-
-            document.getElementById('bkTasaDia').textContent = state.tasaDia ? formatNum(state.tasaDia, 4) : '—';
-            document.getElementById('bkTasaCliente').textContent = tasa ? formatNum(tasa, 2) : '—';
-
-            let bs = null, resultado = '—', final = '—';
-            if (tasa && monto > 0) {
-                if (modoCalc === 'cop') {
-                    bs = monto / tasa;
-                    resultado = formatNum(bs, 2);
-                    final = `Bs ${resultado}`;
-                } else {
-                    bs = monto;
-                    const cop = Math.ceil(monto * tasa);
-                    resultado = formatNum(cop, 0);
-                    final = `${resultado} COP`;
-                }
-            }
-            document.getElementById('resultValue').textContent = resultado;
-            document.getElementById('bkFinal').textContent = final;
-
-            const usd = bs != null && bcv ? bs / bcv : null;
-            document.getElementById('resultUsd').textContent = usd != null
-                ? `≈ $${formatNum(usd, 2)} USD a tasa BCV (${formatNum(bcv, 2)})` : '';
-            document.getElementById('bkUsd').textContent = usd != null ? `$${formatNum(usd, 2)}` : '—';
-
-            actualizarMensaje();
-        }
-
-        // ═══════════════════════════════════════
-        // MENSAJE PARA WHATSAPP
-        // ═══════════════════════════════════════
-        // Acepta "20000, 50.000 100000": separa por coma, punto y coma, espacio o salto
-        function leerMontosWa() {
-            return document.getElementById('waMontos').value
-                .split(/[,;\s]+/)
-                .map(t => parseInt(t.replace(/\D/g, ''), 10))
-                .filter(n => n > 0);
-        }
-
-        function onWaMontosChange() {
-            guardarLocal('remesa_wa_montos', document.getElementById('waMontos').value);
-            actualizarMensaje();
-        }
-
-        function onWaUsdChange() {
-            guardarLocal('remesa_wa_usd', document.getElementById('waUsd').checked ? '1' : '0');
-            actualizarMensaje();
-        }
-
-        function construirMensaje() {
-            const tasa = state.tasaCliente;
-            if (!tasa) return null;
-            const bcv = state.priceBcv;
-            const conUsd = document.getElementById('waUsd').checked && bcv;
-            const lineas = [
-                `💱 *Tasa del día: ${formatNum(tasa, 2)}*`,
-                `🇨🇴 COP ➡️ Bs 🇻🇪`,
-                ``,
-            ];
-            leerMontosWa().forEach(cop => {
-                const bs = cop / tasa;
-                let linea = `• ${formatNum(cop, 0)} COP ➡️ *${formatNum(bs, 2)} Bs*`;
-                if (conUsd) linea += ` (≈ $${formatNum(bs / bcv, 2)})`;
-                lineas.push(linea);
-            });
-            if (conUsd) {
-                lineas.push('', `💵 Dólares calculados a tasa BCV: ${formatNum(bcv, 2)} Bs`);
-            }
-            return lineas.join('\n');
-        }
-
-        function actualizarMensaje() {
-            const msg = construirMensaje();
-            document.getElementById('waPreview').textContent = msg || 'Esperando la tasa del día…';
-        }
-
-        async function copiarMensaje() {
-            const msg = construirMensaje();
-            const aviso = document.getElementById('waMsg');
-            if (!msg) { aviso.textContent = '⚠️ Aún no hay tasa del día.'; return; }
-            try {
-                await navigator.clipboard.writeText(msg);
-                aviso.textContent = '✅ Mensaje copiado. Pégalo en WhatsApp.';
-            } catch (e) {
-                // Respaldo para navegadores sin permiso de portapapeles
-                const ta = document.createElement('textarea');
-                ta.value = msg;
-                document.body.appendChild(ta);
-                ta.select();
-                const ok = document.execCommand('copy');
-                ta.remove();
-                aviso.textContent = ok ? '✅ Mensaje copiado. Pégalo en WhatsApp.' : '⚠️ No se pudo copiar; usa "Enviar por WhatsApp".';
-            }
-        }
-
-        function enviarWhatsApp() {
-            const msg = construirMensaje();
-            if (!msg) { document.getElementById('waMsg').textContent = '⚠️ Aún no hay tasa del día.'; return; }
-            window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-        }
-
-        // ═══════════════════════════════════════
-        // TABS
-        // ═══════════════════════════════════════
-        function switchTab(name) {
-            document.getElementById('tabBtnCalc').classList.toggle('active', name === 'calc');
-            document.getElementById('tabBtnParams').classList.toggle('active', name === 'params');
-            document.getElementById('tabBtnImg').classList.toggle('active', name === 'img');
-            document.getElementById('tabCalc').classList.toggle('active', name === 'calc');
-            document.getElementById('tabParams').classList.toggle('active', name === 'params');
-            document.getElementById('tabImg').classList.toggle('active', name === 'img');
-            if (name === 'img') renderImg();
-        }
-
-        // ═══════════════════════════════════════
-        // IMAGEN CON TASA DEL DÍA
-        // ═══════════════════════════════════════
-        let imgMode = 'template';
-        let imgFileData = null;
-        let imgRateTouched = false;
-        let imgRenderId = 0;
-
-        function setImgMode(mode) {
-            imgMode = mode;
-            document.getElementById('modeTemplate').classList.toggle('active', mode === 'template');
-            document.getElementById('modeUpload').classList.toggle('active', mode === 'upload');
-            document.getElementById('imgTemplateBox').style.display = mode === 'template' ? '' : 'none';
-            document.getElementById('imgUploadBox').style.display = mode === 'upload' ? '' : 'none';
-            document.getElementById('imgPreviewBox').style.display = (mode === 'upload' && !imgFileData) ? 'none' : '';
-            renderImg();
-        }
-
-        function onImgFile(e) {
-            const f = e.target.files[0];
-            if (!f) return;
-            const r = new FileReader();
-            r.onload = () => {
-                imgFileData = r.result;
-                document.getElementById('imgPreviewBox').style.display = '';
-                renderImg();
-            };
-            r.readAsDataURL(f);
-        }
-
-        function onImgRateChange() {
-            imgRateTouched = true;
-            renderImg();
-        }
-
-        function tasaFormateada() {
-            const v = parseFloat(document.getElementById('imgRate').value);
-            if (!isNaN(v) && v > 0) return v;
-            return state.tasaCliente || state.priceVes || null;
-        }
-
-        function loadImg(src) {
-            return new Promise(res => {
-                const im = new Image();
-                im.onload = () => res(im);
-                im.onerror = () => res(null);
-                im.src = src;
-            });
-        }
-
-        function fmtTasa(n) {
-            return n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        async function renderImg() {
-            // Si se piden varios renders seguidos, solo el último pinta
-            const miRender = ++imgRenderId;
-            const cv = document.getElementById('imgCanvas');
-            const W = 1080, H = 1080;
-            cv.width = W;
-            cv.height = H;
-            const ctx = cv.getContext('2d');
-            const tasa = tasaFormateada();
-
-            let im = null;
-            if (imgMode === 'upload' && imgFileData) {
-                im = await loadImg(imgFileData);
-            } else {
-                im = await loadImg(plantillaUrl);
-            }
-            // Asegura que la fuente esté cargada antes de dibujar en el canvas
-            try { await document.fonts.load('800 ' + imgSize + 'px Inter'); } catch (e) { }
-            if (miRender !== imgRenderId) return;
-
-            if (im) {
-                const scale = Math.max(W / im.width, H / im.height);
-                const dw = im.width * scale, dh = im.height * scale;
-                ctx.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
-            } else {
-                const g = ctx.createLinearGradient(0, 0, W, H);
-                g.addColorStop(0, '#0a0a14');
-                g.addColorStop(0.5, '#101c3d');
-                g.addColorStop(1, '#083b30');
-                ctx.fillStyle = g;
-                ctx.fillRect(0, 0, W, H);
-            }
-
-            // ─── LA TASA en la posición configurada ───
-            const x = W * imgPosX / 100;
-            const y = H * imgPosY / 100;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-            ctx.shadowBlur = 18;
-            ctx.font = '800 ' + imgSize + 'px Inter, Arial, sans-serif';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(tasa != null ? fmtTasa(tasa) : '—', x, y);
-            ctx.shadowBlur = 0;
-
-            document.getElementById('imgResult').src = cv.toDataURL('image/jpeg', 0.92);
-        }
-
-        const plantillaUrl = 'imagenes/plantilla-remesa.jpg';
-        let imgPosX, imgPosY, imgSize;
-        (function () {
-            const px = parseFloat(leerLocal('remesa_imgposx'));
-            const py = parseFloat(leerLocal('remesa_imgposy'));
-            const ps = parseFloat(leerLocal('remesa_imgsize'));
-            imgPosX = isNaN(px) ? 81 : px;
-            imgPosY = isNaN(py) ? 51 : py;
-            imgSize = isNaN(ps) ? 100 : ps;
-            const ex = document.getElementById('imgPosX');
-            if (ex) {
-                ex.value = imgPosX;
-                document.getElementById('imgPosY').value = imgPosY;
-                document.getElementById('imgSize').value = imgSize;
-            }
-        })();
-
-        function onImgPosChange() {
-            imgPosX = Math.min(100, Math.max(0, leerNum('imgPosX', 81)));
-            imgPosY = Math.min(100, Math.max(0, leerNum('imgPosY', 51)));
-            imgSize = Math.min(400, Math.max(40, leerNum('imgSize', 100)));
-            guardarLocal('remesa_imgposx', imgPosX);
-            guardarLocal('remesa_imgposy', imgPosY);
-            guardarLocal('remesa_imgsize', imgSize);
-            renderImg();
-        }
-
-        function onClickPreview(e) {
-            const img = document.getElementById('imgResult');
-            const r = img.getBoundingClientRect();
-            const pctX = Math.round((e.clientX - r.left) / r.width * 100);
-            const pctY = Math.round((e.clientY - r.top) / r.height * 100);
-            document.getElementById('imgPosX').value = Math.min(100, Math.max(0, pctX));
-            document.getElementById('imgPosY').value = Math.min(100, Math.max(0, pctY));
-            onImgPosChange();
-        }
-
-        function downloadImg() {
-            const a = document.createElement('a');
-            a.download = 'tasa-remesa-cop.jpg';
-            a.href = document.getElementById('imgCanvas').toDataURL('image/jpeg', 0.92);
-            a.click();
-        }
-
-        // Compartir la imagen (WhatsApp, etc.) con el menú nativo del teléfono
-        function imagenComoArchivo() {
-            return new Promise(res => document.getElementById('imgCanvas').toBlob(
-                b => res(b ? new File([b], 'tasa-remesa-cop.jpg', { type: 'image/jpeg' }) : null),
-                'image/jpeg', 0.92));
-        }
-
-        async function compartirImg() {
-            const err = document.getElementById('imgError');
-            err.style.display = 'none';
-            try {
-                const file = await imagenComoArchivo();
-                await navigator.share({ files: [file] });
-            } catch (e) {
-                if (e && e.name === 'AbortError') return; // el usuario cerró el menú
-                err.textContent = '⚠️ No se pudo compartir; usa "Descargar JPG".';
-                err.style.display = 'block';
-            }
-        }
-
-        // ═══════════════════════════════════════
-        // UTILS
-        // ═══════════════════════════════════════
-        // Lee un número de un input; si está vacío o inválido usa el defecto (0 sí es válido)
-        function leerNum(id, def) {
-            const v = parseFloat(document.getElementById(id).value);
-            return isNaN(v) ? def : v;
-        }
-
-        // localStorage puede fallar (modo privado, almacenamiento bloqueado)
-        function leerLocal(key) {
-            try { return localStorage.getItem(key); } catch (e) { return null; }
-        }
-
-        function guardarLocal(key, value) {
-            try { localStorage.setItem(key, value); } catch (e) { }
-        }
-
-        function formatNum(n, decimals) {
-            return n.toLocaleString('es-CO', {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals,
-            });
-        }
-
-        // ═══════════════════════════════════════
-        // INIT
-        // ═══════════════════════════════════════
-        window.addEventListener('DOMContentLoaded', () => {
-            // Restaurar configuración guardada
-            const savedMontos = leerLocal('remesa_wa_montos');
-            if (savedMontos) document.getElementById('waMontos').value = savedMontos;
-            if (leerLocal('remesa_wa_usd') === '0') document.getElementById('waUsd').checked = false;
-            // Último dólar BCV conocido, por si hoy no carga en vivo
-            const savedBcv = parseFloat(leerLocal('remesa_bcv'));
-            if (savedBcv > 0) {
-                state.priceBcv = savedBcv;
-                document.getElementById('priceBcv').textContent = formatNum(savedBcv, 2);
-                document.getElementById('nickBcv').textContent = 'Último guardado';
-                document.getElementById('manualBcv').value = savedBcv;
-            }
-            // Mostrar "Compartir imagen" solo si el teléfono lo permite
-            try {
-                const prueba = new File([''], 'x.jpg', { type: 'image/jpeg' });
-                if (navigator.canShare && navigator.canShare({ files: [prueba] })) {
-                    document.getElementById('btnShareImg').style.display = '';
-                }
-            } catch (e) { }
-            setImgMode('template');
-            actualizarCalculadora();
-            // Try to fetch from Binance on load
-            fetchPrices();
-            // Auto-refresh every 5 minutes (también reintenta si quedó sin conexión)
-            setInterval(fetchPrices, 300000);
-        });
-    </script>
-
+  /* ───────── arranque ───────── */
+  initStore();
+})();
+</script>
 </body>
-
 </html>
