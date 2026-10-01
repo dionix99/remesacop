@@ -4,6 +4,7 @@ const BCV_URL = 'https://ve.dolarapi.com/v1/dolares/oficial';
 const MARKETS = {
     VES: { fiat: 'VES', payType: 'Mercantil' },
     COP: { fiat: 'COP', payType: 'BancolombiaSA' },
+    PEN: { fiat: 'PEN', payType: 'Yape' },
 };
 
 function buildPayload(fiat, payType) {
@@ -72,19 +73,22 @@ export default async function handler(req, res) {
             value => ({ value, error: null }),
             e => ({ value: null, error: String((e && e.message) || e) })
         );
-        const results = await Promise.all([fetchOne('VES'), fetchOne('COP')]);
+        // Cada mercado falla por separado: si PEN (Yape) no responde, Colombia sigue funcionando igual.
+        const results = await Promise.all([fetchOne('VES'), fetchOne('COP'), fetchOne('PEN')]);
         const bcv = await bcvPromise;
 
         const ves = results.find(r => r.key === 'VES');
         const cop = results.find(r => r.key === 'COP');
+        const pen = results.find(r => r.key === 'PEN');
 
         res.status(200).json({
             ok: true,
             updatedAt: new Date().toISOString(),
             ves: ves.value,
             cop: cop.value,
+            pen: pen.value,
             bcv: bcv.value,
-            errors: { ves: ves.error, cop: cop.error, bcv: bcv.error },
+            errors: { ves: ves.error, cop: cop.error, pen: pen.error, bcv: bcv.error },
         });
     } catch (err) {
         res.status(500).json({ ok: false, error: String((err && err.message) || err) });
