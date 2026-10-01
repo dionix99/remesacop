@@ -1360,6 +1360,13 @@ details .inner { padding: 0 20px 20px; }
         <button type="button" class="tab-btn active" id="emp-con">👩 Con empleada</button>
         <button type="button" class="tab-btn" id="emp-sin">🙋 Sin empleada</button>
       </div>
+      <div class="img-mode-toggle" id="emp-pct" hidden role="group" aria-label="Porcentaje de la empleada">
+        <button type="button" class="tab-btn" data-pct="1">1 %</button>
+        <button type="button" class="tab-btn" data-pct="2">2 %</button>
+        <button type="button" class="tab-btn" data-pct="3">3 %</button>
+        <button type="button" class="tab-btn" data-pct="4">4 %</button>
+        <button type="button" class="tab-btn" data-pct="5">5 %</button>
+      </div>
       <div class="img-mode-toggle">
         <button type="button" class="tab-btn active" id="modo-cop">🇨🇴 COP → Bs 🇻🇪</button>
         <button type="button" class="tab-btn" id="modo-bs">🇻🇪 Bs → COP 🇨🇴</button>
@@ -1991,7 +1998,7 @@ function remesaCalc(r) {
     $('rr-val').textContent = tasa ? fmt(tasa, d) : '—';
     $('rr-sub').textContent = !tasa ? 'Esperando los precios en vivo…'
       : (pe ? 'Bs por 1 PEN · ' : '') + 'Tasa del día · ' + (pub.ts ? (sameDay(pub.ts) ? 'actualizada hoy ' : 'de otro día: ') + fmtStamp(pub.ts) : 'sin fecha')
-        + (pe && !empOn() ? ' · SIN empleada' : '');
+        + (pe && !empOn() ? ' · SIN empleada' : (pe && unlocked ? ' · empleada ' + String(cfg.pe.com).replace('.', ',') + ' %' : ''));
     var amt = parseFloat($('calc-monto').value), bcv = pub.bcv;
     var res = null;
     if (tasa && isFinite(amt) && amt >= 0) {
@@ -2400,10 +2407,20 @@ function remesaCalc(r) {
     $('emp-con').classList.toggle('active', on);
     $('emp-sin').classList.toggle('active', !on);
     $('emp-con').textContent = '👩 Con empleada (' + String(cfg.pe.com).replace('.', ',') + ' %)';
+    /* porcentajes 1 a 5 %: solo con clave, en Perú y cuando el cliente es de empleada */
+    $('emp-pct').hidden = !(pais === 'pe' && unlocked && on);
+    document.querySelectorAll('#emp-pct [data-pct]').forEach(function (b) { b.classList.toggle('active', +b.dataset.pct === cfg.pe.com); });
   }
   function onEmpChange(v) { cfg.peEmp = v; applyEmp(); onCfgChange(); }
   $('emp-con').addEventListener('click', function () { if (unlocked) onEmpChange(true); });
   $('emp-sin').addEventListener('click', function () { if (unlocked) onEmpChange(false); });
+  document.querySelectorAll('#emp-pct [data-pct]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (!unlocked) return;
+      cfg.pe.com = +b.dataset.pct;
+      applyEmp(); fillInputs(); onCfgChange();
+    });
+  });
 
   function applyPais() {
     var pe = pais === 'pe', cur = curOf(pais);
