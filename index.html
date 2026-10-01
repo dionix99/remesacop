@@ -2154,16 +2154,18 @@ function remesaCalc(r) {
     if (pub.tasa !== imgLastPub) { imgLastPub = pub.tasa; imgRateTouched = false; }
     if (!imgRateTouched) { var pr = $('im-rate'); if (document.activeElement !== pr) pr.value = pub.tasa ? pub.tasa.toFixed(pubDigits()) : ''; }
     var cv = $('im-cv'), W = 1080, H = 1080;
-    cv.width = W; cv.height = H;
-    var ctx = cv.getContext('2d');
     var v = parseFloat($('im-rate').value);
     var tasa = isFinite(v) && v > 0 ? v : pub.tasa;
     $('im-msg').textContent = (tasa && pub.tasa && Math.abs(tasa - pub.tasa) > 0.0049)
       ? '⚠️ La imagen muestra ' + tasa.toFixed(2) + ' pero la tasa del día es ' + pub.tasa.toFixed(pubDigits()) + '. Borra el campo para igualarla.'
       : '';
     var im = await loadImg(imgMode === 'upload' && imgFileData ? imgFileData : (pais === 'pe' ? 'imagenes/plantilla-remesa-pe.jpg' : 'imagenes/plantilla-remesa.jpg'));
-    try { await document.fonts.load('800 ' + imgS + 'px Inter'); } catch (e) { /* usa la fuente de respaldo */ }
-    if (mine !== imgRenderId) return;
+    /* si la fuente tarda en bajar (internet lento) no esperamos más de 1,2 s: se usa la fuente de respaldo */
+    try { await Promise.race([document.fonts.load('800 ' + imgS + 'px Inter'), new Promise(function (r) { setTimeout(r, 1200); })]); } catch (e) { /* usa la fuente de respaldo */ }
+    if (mine !== imgRenderId) return false;
+    /* el lienzo se limpia y se dibuja todo de una vez, así nunca queda en blanco mientras se espera */
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d');
     if (im) {
       var sc = Math.max(W / im.width, H / im.height), dw = im.width * sc, dh = im.height * sc;
       ctx.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh);
@@ -2180,19 +2182,39 @@ function remesaCalc(r) {
     ctx.fillText(tasa ? tasa.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—', W * imgX / 100, H * imgY / 100);
     ctx.shadowBlur = 0;
     $('im-out').src = cv.toDataURL('image/jpeg', 0.92);
+    return true;
   }
-  $('im-dl').addEventListener('click', function () {
-    var a = document.createElement('a');
-    a.download = 'tasa-remesa-' + curOf(pais).toLowerCase() + '.jpg';
-    a.href = $('im-cv').toDataURL('image/jpeg', 0.92);
-    document.body.appendChild(a); a.click(); a.remove();
+  /* Antes de descargar o compartir se termina de dibujar la imagen actual, así nunca sale en blanco ni a medias. */
+  async function imgBlob() {
+    for (var i = 0; i < 3; i++) { if (await renderImg()) break; }
+    return new Promise(function (res) { $('im-cv').toBlob(res, 'image/jpeg', 0.92); });
+  }
+  $('im-dl').addEventListener('click', async function () {
+    var msg = $('im-msg'), btn = $('im-dl');
+    if (btn.disabled) return;
+    btn.disabled = true; msg.textContent = '⏳ Preparando la imagen…';
+    try {
+      var blob = await imgBlob();
+      if (!blob) throw new Error('sin imagen');
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.download = 'tasa-remesa-' + curOf(pais).toLowerCase() + '.jpg';
+      a.href = url;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 15000);
+      if (!msg.textContent || msg.textContent.indexOf('⏳') === 0) msg.textContent = '✅ Imagen lista.' + (navigator.share && navigator.canShare ? ' Si no se descargó, usa "Compartir imagen".' : '');
+    } catch (e) {
+      msg.textContent = '⚠️ No se pudo preparar la imagen. Toca "Actualizar" e inténtalo otra vez.';
+    } finally {
+      btn.disabled = false;
+    }
   });
   if (navigator.share && navigator.canShare) $('im-share').style.display = '';
-  $('im-share').addEventListener('click', function () {
-    $('im-cv').toBlob(async function (b) {
-      try { await navigator.share({ files: [new File([b], 'tasa-remesa-' + curOf(pais).toLowerCase() + '.jpg', { type: 'image/jpeg' })] }); }
-      catch (e) { if (!e || e.name !== 'AbortError') $('im-msg').textContent = '⚠️ No se pudo compartir; usa "Descargar JPG".'; }
-    }, 'image/jpeg', 0.92);
+  $('im-share').addEventListener('click', async function () {
+    var b = await imgBlob();
+    if (!b) { $('im-msg').textContent = '⚠️ No se pudo preparar la imagen.'; return; }
+    try { await navigator.share({ files: [new File([b], 'tasa-remesa-' + curOf(pais).toLowerCase() + '.jpg', { type: 'image/jpeg' })] }); }
+    catch (e) { if (!e || e.name !== 'AbortError') $('im-msg').textContent = '⚠️ No se pudo compartir; usa "Descargar JPG".'; }
   });
 
   /* ───────── mis cálculos (interno) ───────── */
